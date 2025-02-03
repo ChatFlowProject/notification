@@ -1,6 +1,8 @@
 package com.example.notification.service;
 
+import com.example.notification.common.ApiStatus;
 import com.example.notification.config.MemberServiceClient;
+import com.example.notification.dto.ApiResponse;
 import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
@@ -14,9 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 
 @Service
@@ -26,46 +30,59 @@ public class NotiService {
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final MemberServiceClient memberServiceClient;
 
-    // 멤버 서비스에서 멤버 정보 가져오기
-    public MemberResponse getMemberInfo(UUID memberId) {
-        ResponseEntity<MemberResponse> response = memberServiceClient.getMemberById(memberId.toString());
-        if(response.getStatusCode().is2xxSuccessful() && response.getBody() != null){
-            return response.getBody();
-        } else {
-            throw new RuntimeException("멤버 정보를 불러오는데 실패했습니다.");
+    // 모든 멤버 조회 메서드
+    public List<MemberResponse> getAllMembers() {
+        ApiResponse<List<MemberResponse>> response = memberServiceClient.getAllMembers();
+
+        if (response.status() != ApiStatus.SUCCESS || response.data() == null) {
+            throw new RuntimeException("Failed to fetch members: " + response.message());
         }
+
+        return response.data();
     }
 
+    // 특정 멤버 정보를 ID로 조회하는 메서드
+    private MemberResponse findMemberById(UUID memberId) {
+        List<MemberResponse> members = getAllMembers();
+
+        return members.stream()
+                .filter(member -> member.getId().equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Member not found for ID: " + memberId));
+    }
 
     // 클라이언트가 SSE 연결 구독
-    public SseEmitter subscribe(Long userId){
+    public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
         emitters.put(userId, emitter);
-        emitter.onCompletion(()-> emitters.remove(userId));
-        emitter.onTimeout(()-> emitters.remove(userId));
-        // redis pub/sub 메시지 리스너 등록
-        redisTemplate.convertAndSend("notification-channel", "user"+userId+"connected");
+        emitter.onCompletion(() -> emitters.remove(userId));
+        emitter.onTimeout(() -> emitters.remove(userId));
+        redisTemplate.convertAndSend("notification-channel", "user" + userId + " connected");
         return emitter;
     }
+
     // 멘션 알림 전송
-    public void sendMentionNoti(MentionNotiReq request){
-        MemberResponse mentionedUser = getMemberInfo(request.getMentionUserId());
-        String message = mentionedUser.getName()+", you were mentioned:"+request.getMessage();
-        sendNotiToRedis(request.getMentionUserId(), "you were mentioned"+request.getMessage());
+    public void sendMentionNoti(MentionNotiReq request) {
+        MemberResponse mentionedUser = findMemberById(request.getMentionUserId());
+        String message = mentionedUser.getName() + ", you were mentioned: " + request.getMessage();
+        sendNotiToRedis(request.getMentionUserId(), message);
     }
+
     // 친구 요청 알림 전송
-    public void sendFriendRequestNoti(FriendRequestNotiReq request){
-        MemberResponse targetUser = getMemberInfo(request.getTargetUserId());
-        String message = targetUser.getName()+", 친구 요청을 받았습니다."+request.getMessage();
-        sendNotiToRedis(request.getTargetUserId(), "you received a friend request:"+request.getMessage());
-    }
-    // 채팅 메시지 알림 전송
-    public void sendChatMessageNoti(ChatMessageNotiReq request){
-        MemberResponse targetUser = getMemberInfo(request.getTargetUserId());
-        String message = targetUser.getName()+", 새로운 메시지가 있습니다."+request.getMessage();
+    public void sendFriendRequestNoti(FriendRequestNotiReq request) {
+        MemberResponse targetUser = findMemberById(request.getTargetUserId());
+        String message = targetUser.getName() + ", 친구 요청을 받았습니다: " + request.getMessage();
         sendNotiToRedis(request.getTargetUserId(), message);
     }
-    private void sendNotiToRedis(UUID userId, String message){
+
+    // 채팅 메시지 알림 전송
+    public void sendChatMessageNoti(ChatMessageNotiReq request) {
+        MemberResponse targetUser = findMemberById(request.getTargetUserId());
+        String message = targetUser.getName() + ", 새로운 메시지가 있습니다: " + request.getMessage();
+        sendNotiToRedis(request.getTargetUserId(), message);
+    }
+
+    private void sendNotiToRedis(UUID userId, String message) {
         redisTemplate.convertAndSend("notification-channel", new NotificationMessage(userId, message));
     }
 
@@ -80,5 +97,5 @@ public class NotiService {
             }
         }
     }
-
 }
+

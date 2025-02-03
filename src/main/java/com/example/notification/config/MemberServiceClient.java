@@ -1,12 +1,12 @@
 package com.example.notification.config;
 
+import com.example.notification.dto.ApiResponse;
 import com.example.notification.dto.MemberResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+
 
 @FeignClient(
         name = "member-service",
@@ -15,11 +15,7 @@ import java.util.List;
 )
 public interface MemberServiceClient {
 
-    // 회원 전체 조회 API 호출
-    @GetMapping("/admin/members")
-    ResponseEntity<List<MemberResponse>> getAllMembers();
-
-    // 특정 회원 정보 조회 API 호출
-    @GetMapping("/admin/members/{memberId}")
-    ResponseEntity<MemberResponse> getMemberById(@PathVariable("memberId") String memberId);
+    // 친구 목록 API 호출
+    @GetMapping("/members/friends") // 멤버 서비스의 실제 경로와 일치해야 함
+    ApiResponse<List<MemberResponse>> getAllMembers();
 }
