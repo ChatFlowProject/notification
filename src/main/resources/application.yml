@@ -21,7 +21,7 @@ spring:
   redis:
     host: redis # docker-compose의 redis 서비스 이름에 맞춤
     port: 6379
-    password: # 비밀번호가 없으므로 빈 값으로 둠
+
 
 tag:
   version: 0.2.0
