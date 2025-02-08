@@ -1,8 +1,10 @@
 package com.example.notification.controller;
 
+import com.example.notification.common.BaseResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.service.NotiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -25,9 +27,9 @@ public class NotiController {
 
     // 2. 멘션 알림 생성 API
     @PostMapping("/mention")
-    public ResponseEntity<Void> sendMentionNotification(@RequestBody MentionNotiReq request) {
-        notificationService.sendMentionNoti(request);
-        return ResponseEntity.ok().build();
+    public BaseResponse<MentionNotiRes> sendMentionNotification(@RequestBody MentionNotiReq request) {
+        MentionNotiRes mentionNotiRes = notificationService.sendMentionNoti(request);
+        return new BaseResponse<>(mentionNotiRes);
     }
 
     // 3. 친구 요청 알림 생성 API

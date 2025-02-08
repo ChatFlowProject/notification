@@ -7,11 +7,11 @@ import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.entity.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -60,29 +60,40 @@ public class NotiService {
         redisTemplate.convertAndSend("notification-channel", "user" + userId + " connected");
         return emitter;
     }
-
-    // 멘션 알림 전송
-    public void sendMentionNoti(MentionNotiReq request) {
+    // 멘션 알림
+    public MentionNotiRes sendMentionNoti(MentionNotiReq request) {
+        // 멘션된 사용자 정보 조회
         MemberResponse mentionedUser = findMemberById(request.getMentionUserId());
-        String message = mentionedUser.getName() + ", you were mentioned: " + request.getMessage();
-        sendNotiToRedis(request.getMentionUserId(), message);
+
+        // Redis를 통해 알림 전송
+        sendNotiToRedis(request.getMentionUserId());
+
+        // MentionNotiRes 객체 생성 및 반환
+        return MentionNotiRes.builder()
+                .mentionedUserId(mentionedUser.getId()) // 멘션된 사용자의 ID 설정
+                .build();
     }
+
 
     // 친구 요청 알림 전송
     public void sendFriendRequestNoti(FriendRequestNotiReq request) {
         MemberResponse targetUser = findMemberById(request.getTargetUserId());
         String message = targetUser.getName() + ", 친구 요청을 받았습니다: " + request.getMessage();
-        sendNotiToRedis(request.getTargetUserId(), message);
+        sendNotiWithMessageToRedis(request.getTargetUserId(), message);
     }
 
     // 채팅 메시지 알림 전송
     public void sendChatMessageNoti(ChatMessageNotiReq request) {
         MemberResponse targetUser = findMemberById(request.getTargetUserId());
         String message = targetUser.getName() + ", 새로운 메시지가 있습니다: " + request.getMessage();
-        sendNotiToRedis(request.getTargetUserId(), message);
+        sendNotiToRedis(request.getTargetUserId());
     }
 
-    private void sendNotiToRedis(UUID userId, String message) {
+    private void sendNotiToRedis(UUID userId) {
+        redisTemplate.convertAndSend("notification-channel", "멘션 되었습니다.");
+    }
+
+    private void sendNotiWithMessageToRedis(UUID userId, String message) {
         redisTemplate.convertAndSend("notification-channel", new NotificationMessage(userId, message));
     }
 

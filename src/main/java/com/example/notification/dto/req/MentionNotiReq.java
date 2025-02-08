@@ -7,5 +7,5 @@ import java.util.UUID;
 @Data
 public class MentionNotiReq {
     private UUID mentionUserId;
-    private String message;
+    private UUID mentionedUserId;
 }

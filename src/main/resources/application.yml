@@ -26,7 +26,12 @@ spring:
 tag:
   version: 0.2.0
 
-
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
 
 
 

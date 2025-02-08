@@ -15,7 +15,7 @@ public enum BaseResponseStatus {
     UNAUTHORIZED_CLIENT(false, 2001, "인증이 안된 유저입니다."),
     BAD_ACCESS_TOKEN(false, 2002, "유요하지 않는 토큰입니다."),
     NOT_FOUND(false, 2003, "해당 데이터가 없습니다."),
-    INTERNAL_SERVER_ERROR(false, 2004, "서버 에러입니다.");
+    INTERNAL_SERVER_ERROR1(false, 2004, "서버 에러입니다.");
 
 
     private final boolean isSuccess;
