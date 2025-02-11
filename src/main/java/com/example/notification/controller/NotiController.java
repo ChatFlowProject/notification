@@ -2,9 +2,11 @@ package com.example.notification.controller;
 
 import com.example.notification.common.BaseResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
+import com.example.notification.dto.req.FriendRequestAcceptReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
 import com.example.notification.dto.res.ChatMessageNotiRes;
+import com.example.notification.dto.res.FriendRequestAcceptRes;
 import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.service.NotiService;
@@ -48,5 +50,13 @@ public class NotiController {
     public BaseResponse<ChatMessageNotiRes> sendChatMessageNotification(@RequestBody ChatMessageNotiReq request) {
         ChatMessageNotiRes chatMessageNotiRes = notificationService.sendChatMessageNoti(request);
         return new BaseResponse<>(chatMessageNotiRes);
+    }
+    // 5. 서버 생성시 알림 추가 (그룹 서버 생성 후 추가 구현)
+
+    // 6. 친구 요청 승인시 알림
+    @PostMapping("/friend-request/accept")
+    public BaseResponse<FriendRequestAcceptRes> acceptFriendRequestNotification(@RequestBody FriendRequestAcceptReq request){
+        FriendRequestAcceptRes friendRequestAcceptRes = notificationService.acceptFriendRequestNoti(request);
+        return new BaseResponse<>(friendRequestAcceptRes);
     }
 }

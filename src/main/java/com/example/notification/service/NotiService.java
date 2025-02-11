@@ -7,9 +7,11 @@ import com.example.notification.config.MemberServiceClient;
 import com.example.notification.dto.ApiResponse;
 import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
+import com.example.notification.dto.req.FriendRequestAcceptReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
 import com.example.notification.dto.res.ChatMessageNotiRes;
+import com.example.notification.dto.res.FriendRequestAcceptRes;
 import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.entity.Notification;
@@ -156,6 +158,31 @@ public class NotiService {
                 .type(NotificationType.CHAT_MESSAGE) // 알림 타입: 채팅 메시지
                 .build();
     }
+
+    public FriendRequestAcceptRes acceptFriendRequestNoti(FriendRequestAcceptReq request){
+        // 1. 요청 보낸 사용자와 수락한 사용자 정보 조회
+        MemberResponse requester = findMemberById(request.getRequesterId());
+        MemberResponse accepter = findMemberById(request.getAccepterId());
+        // 2. 친구 관계 업데이트
+        Notification notification = Notification.builder()
+                .recipientId(requester.getId())
+                .type(NotificationType.FRIEND_REQUEST_ACCEPTED)
+                .status(NotificationStatus.NOTREAD)
+                .build();
+        notiRepository.save(notification);
+        // 3. redis를 통해 실시간 알림 전송
+        String message = accepter.getName()+"님이 친구 요청을 수락했습니다.";
+        sendNotiWithMessageToRedis(request.getRequesterId(), message);
+
+        return FriendRequestAcceptRes.builder()
+                .accepterId(accepter.getId())
+                .accepterName(accepter.getName())
+                .build();
+    }
+
+
+
+
     private void sendNotiToRedis(UUID userId) {
         redisTemplate.convertAndSend("notification-channel", "멘션 되었습니다.");
     }
