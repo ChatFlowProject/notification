@@ -4,6 +4,7 @@ import com.example.notification.common.BaseResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.service.NotiService;
 import lombok.RequiredArgsConstructor;
@@ -34,9 +35,9 @@ public class NotiController {
 
     // 3. 친구 요청시 알림 생성 API
     @PostMapping("/friend-request")
-    public ResponseEntity<Void> sendFriendRequestNotification(@RequestBody FriendRequestNotiReq request) {
-        notificationService.sendFriendRequestNoti(request);
-        return ResponseEntity.ok().build();
+    public BaseResponse<FriendRequestNotiRes> sendFriendRequestNotification(@RequestBody FriendRequestNotiReq request) {
+        FriendRequestNotiRes friendRequestNotiRes = notificationService.sendFriendRequestNoti(request);
+        return new BaseResponse<>(friendRequestNotiRes);
     }
 
     // 4. 채팅 메시지 알림 생성 API

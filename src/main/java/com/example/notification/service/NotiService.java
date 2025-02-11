@@ -1,14 +1,19 @@
 package com.example.notification.service;
 
 import com.example.notification.common.ApiStatus;
+import com.example.notification.common.NotificationStatus;
+import com.example.notification.common.NotificationType;
 import com.example.notification.config.MemberServiceClient;
 import com.example.notification.dto.ApiResponse;
 import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
+import com.example.notification.entity.Notification;
 import com.example.notification.entity.NotificationMessage;
+import com.example.notification.repository.NotiRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,6 +34,7 @@ public class NotiService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final MemberServiceClient memberServiceClient;
+    private final NotiRepository notiRepository;
 
     // 모든 멤버 조회 메서드
     public List<MemberResponse> getAllMembers() {
@@ -81,16 +87,41 @@ public class NotiService {
                 .categoryId(1L)
                 .categoryName("category1")
                 .mentionedUserId(request.getMentionUserId()) // 멘션된 사용자의 ID 설정
+                .type(NotificationType.MENTION)
+                .status(NotificationStatus.NOTREAD)
+                .build();
+    }
+
+    // 친구 요청 시 알림 생성
+    public FriendRequestNotiRes sendFriendRequestNoti(FriendRequestNotiReq friendRequestNotiReq) {
+        // 1. 대상 사용자 정보 가져오기 (findMemberById 메서드 사용)
+        MemberResponse targetUser = findMemberById(friendRequestNotiReq.getTargetUserId());
+
+        // 2. Notification 객체 생성 및 데이터베이스에 저장
+        Notification notification = Notification.builder()
+                .recipientId(friendRequestNotiReq.getTargetUserId()) // 알림 대상 사용자 ID
+                .type(NotificationType.FRIEND_REQUEST)              // 알림 타입: 친구 요청
+                .status(NotificationStatus.NOTREAD)                 // 초기 상태: 읽지 않음
+                .build();
+
+        notiRepository.save(notification);
+
+        // 3. FriendRequestNotiRes 객체 생성 및 반환
+        return FriendRequestNotiRes.builder()
+                .friendUserId(friendRequestNotiReq.getTargetUserId())         // 요청 대상 사용자 ID
+                .type(NotificationType.FRIEND_REQUEST)                       // 알림 타입
+                .status(NotificationStatus.NOTREAD)                          // 읽음 상태
                 .build();
     }
 
 
-    // 친구 요청 알림 전송
-    public void sendFriendRequestNoti(FriendRequestNotiReq request) {
-        MemberResponse targetUser = findMemberById(request.getTargetUserId());
-        String message = targetUser.getName() + ", 친구 요청을 받았습니다: " + request.getMessage();
-        sendNotiWithMessageToRedis(request.getTargetUserId(), message);
-    }
+//
+//    // 특정 사용자의 읽지 않은 알림 조회
+//    public List<Notification> getUnreadNotifications(Long recipientId) {
+//        return notiRepository.findByrecipientIdAndStatus(recipientId, NotificationStatus.NOTREAD);
+//    }
+
+
 
     // 채팅 메시지 알림 전송
     public void sendChatMessageNoti(ChatMessageNotiReq request) {

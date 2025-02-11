@@ -1,5 +1,7 @@
 package com.example.notification.dto.res;
 
+import com.example.notification.common.NotificationStatus;
+import com.example.notification.common.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,4 +21,6 @@ public class MentionNotiRes {
     private Long categoryId;
     private String categoryName;
     private UUID mentionedUserId;
+    private NotificationType type;
+    private NotificationStatus status;
 }
