@@ -14,6 +14,7 @@ import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.entity.Notification;
 import com.example.notification.entity.NotificationMessage;
 import com.example.notification.repository.NotiRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,9 +33,34 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class NotiService {
     private final RedisTemplate<String, Object> redisTemplate;
-    private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
+    private final Map<UUID, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final MemberServiceClient memberServiceClient;
     private final NotiRepository notiRepository;
+
+    // redis pub/sub 리스너 초기화
+    @PostConstruct
+    public void initRedisListener(){
+        redisTemplate.getConnectionFactory().getConnection().subscribe((message, pattern)-> {
+            String receivedMessage = new String(message.getBody());
+            System.out.println("received message from redis"+receivedMessage);
+            // 모든 활성화된 클라이언트로 메시지 전송
+            emitters.forEach((userId, emitter)-> {
+                try {
+                    emitter.send(SseEmitter.event().name("notification").data(receivedMessage));
+                } catch(IOException e){
+                    emitters.remove(userId);
+                }
+            });
+        }, "notification-channel".getBytes());
+    }
+    // 클라이언트가 SSE 연결 구독
+    public SseEmitter subscribe(UUID userId) {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE); // 무제한 대기 시간 설정
+        emitters.put(userId, emitter); // 사용자 ID와 SseEmitter 매핑
+        emitter.onCompletion(() -> emitters.remove(userId)); // 완료 시 제거
+        emitter.onTimeout(() -> emitters.remove(userId)); // 타임아웃 시 제거
+        return emitter;
+    }
 
     // 모든 멤버 조회 메서드
     public List<MemberResponse> getAllMembers() {
@@ -57,22 +83,14 @@ public class NotiService {
                 .orElseThrow(() -> new RuntimeException("Member not found for ID: " + memberId));
     }
 
-    // 클라이언트가 SSE 연결 구독
-    public SseEmitter subscribe(Long userId) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-        emitters.put(userId, emitter);
-        emitter.onCompletion(() -> emitters.remove(userId));
-        emitter.onTimeout(() -> emitters.remove(userId));
-        redisTemplate.convertAndSend("notification-channel", "user" + userId + " connected");
-        return emitter;
-    }
     // 멘션 알림
     public MentionNotiRes sendMentionNoti(MentionNotiReq request) {
         // 멘션된 사용자 정보 조회
         MemberResponse mentionedUser = findMemberById(request.getMentionUserId());
 
         // Redis를 통해 알림 전송
-        sendNotiToRedis(request.getMentionUserId());
+        String message = mentionedUser.getName() + "님이 멘션되었습니다.";
+        sendNotiWithMessageToRedis(request.getMentionUserId(), message);
 
         // MentionNotiRes 객체 생성 및 반환
         return MentionNotiRes.builder()
@@ -105,6 +123,9 @@ public class NotiService {
                 .build();
 
         notiRepository.save(notification);
+        // redis를 통해 친구 요청 알림 전송
+        String message = targetUser.getName() + "님에게 친구 요청이 도착했습니다.";
+        sendNotiWithMessageToRedis(friendRequestNotiReq.getTargetUserId(), message);
 
         // 3. FriendRequestNotiRes 객체 생성 및 반환
         return FriendRequestNotiRes.builder()
@@ -127,7 +148,7 @@ public class NotiService {
     public void sendChatMessageNoti(ChatMessageNotiReq request) {
         MemberResponse targetUser = findMemberById(request.getTargetUserId());
         String message = targetUser.getName() + ", 새로운 메시지가 있습니다: " + request.getMessage();
-        sendNotiToRedis(request.getTargetUserId());
+        sendNotiWithMessageToRedis(request.getTargetUserId(), message);
     }
 
     private void sendNotiToRedis(UUID userId) {

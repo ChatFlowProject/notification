@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/noti")
@@ -22,7 +24,7 @@ public class NotiController {
 
     // 클라이언트가 SSE 연결을 구독
     @GetMapping(value = "/subscribe/{userId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribe(@PathVariable Long userId) {
+    public SseEmitter subscribe(@PathVariable UUID userId) {
         return notificationService.subscribe(userId);
     }
 

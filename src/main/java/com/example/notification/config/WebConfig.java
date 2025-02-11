@@ -6,10 +6,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    public static final String ALLOWED_METHOD_NAMNES = "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH";
-
-    public void addCorsMappings(final CorsRegistry registry){
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedMethods(ALLOWED_METHOD_NAMNES.split(","));
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080") // 허용할 클라이언트 도메인 추가
+                .allowedMethods("GET", "POST")
+                .allowCredentials(true);
     }
 }
+
+
+

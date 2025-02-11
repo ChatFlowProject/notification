@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' http://localhost:8080;">
+    <title>Server-Sent Events Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 600px;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Server-Sent Events (SSE) Example</h1>
+<div id="messages">
+    <p>Waiting for messages...</p>
+</div>
+
+<script>
+    // SSE 연결 설정
+    const eventSource = new EventSource('http://localhost:8080/noti/subscribe/4b5d4a6e-a7f3-4320-825d-5e0c101e4de4');
+
+    // 메시지를 수신했을 때 실행되는 핸들러
+    eventSource.onmessage = (event) => {
+        const messagesDiv = document.getElementById('messages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.textContent = `Received: ${event.data}`;
+        messagesDiv.appendChild(messageElement);
+    };
+
+    // 에러가 발생했을 때 실행되는 핸들러
+    eventSource.onerror = (error) => {
+        console.error('Error:', error);
+        const messagesDiv = document.getElementById('messages');
+        const errorElement = document.createElement('div');
+        errorElement.className = 'message';
+        errorElement.style.color = 'red';
+        errorElement.textContent = 'An error occurred while connecting to the server.';
+        messagesDiv.appendChild(errorElement);
+    };
+</script>
+</body>
+</html>
+
