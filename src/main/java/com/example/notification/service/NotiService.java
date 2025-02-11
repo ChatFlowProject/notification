@@ -9,6 +9,7 @@ import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.ChatMessageNotiRes;
 import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.entity.Notification;
@@ -135,22 +136,26 @@ public class NotiService {
                 .build();
     }
 
-
-//
-//    // 특정 사용자의 읽지 않은 알림 조회
-//    public List<Notification> getUnreadNotifications(Long recipientId) {
-//        return notiRepository.findByrecipientIdAndStatus(recipientId, NotificationStatus.NOTREAD);
-//    }
-
-
-
     // 채팅 메시지 알림 전송
-    public void sendChatMessageNoti(ChatMessageNotiReq request) {
+    // 채팅 메시지 알림 전송
+    public ChatMessageNotiRes sendChatMessageNoti(ChatMessageNotiReq request) {
+        // 1. 대상 사용자 정보 조회
         MemberResponse targetUser = findMemberById(request.getTargetUserId());
+        MemberResponse senderUser = findMemberById(request.getSenderId()); // 발신자 정보 조회
+
+        // 2. Redis를 통해 알림 전송
         String message = targetUser.getName() + ", 새로운 메시지가 있습니다: " + request.getMessage();
         sendNotiWithMessageToRedis(request.getTargetUserId(), message);
-    }
 
+        // 3. ChatMessageNotiRes 객체 생성 및 반환
+        return ChatMessageNotiRes.builder()
+                .message(request.getMessage())
+                .senderId(request.getSenderId()) // 발신자 ID 설정
+                .senderName(senderUser.getName()) // 발신자 이름 설정
+                .status(NotificationStatus.NOTREAD) // 초기 상태: 읽지 않음
+                .type(NotificationType.CHAT_MESSAGE) // 알림 타입: 채팅 메시지
+                .build();
+    }
     private void sendNotiToRedis(UUID userId) {
         redisTemplate.convertAndSend("notification-channel", "멘션 되었습니다.");
     }

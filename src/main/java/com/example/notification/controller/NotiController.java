@@ -4,6 +4,7 @@ import com.example.notification.common.BaseResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
+import com.example.notification.dto.res.ChatMessageNotiRes;
 import com.example.notification.dto.res.FriendRequestNotiRes;
 import com.example.notification.dto.res.MentionNotiRes;
 import com.example.notification.service.NotiService;
@@ -44,8 +45,8 @@ public class NotiController {
 
     // 4. 채팅 메시지 알림 생성 API
     @PostMapping("/chat-message")
-    public ResponseEntity<Void> sendChatMessageNotification(@RequestBody ChatMessageNotiReq request) {
-        notificationService.sendChatMessageNoti(request);
-        return ResponseEntity.ok().build();
+    public BaseResponse<ChatMessageNotiRes> sendChatMessageNotification(@RequestBody ChatMessageNotiReq request) {
+        ChatMessageNotiRes chatMessageNotiRes = notificationService.sendChatMessageNoti(request);
+        return new BaseResponse<>(chatMessageNotiRes);
     }
 }
