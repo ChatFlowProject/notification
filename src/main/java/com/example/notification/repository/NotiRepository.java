@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NotiRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByUserId(Long userId);
+    public interface NotiRepository extends JpaRepository<Notification, Long> {
+        List<Notification> findByrecipientId(Long userId);
 }

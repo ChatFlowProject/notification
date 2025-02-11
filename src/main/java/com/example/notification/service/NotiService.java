@@ -70,7 +70,17 @@ public class NotiService {
 
         // MentionNotiRes 객체 생성 및 반환
         return MentionNotiRes.builder()
-                .mentionedUserId(mentionedUser.getId()) // 멘션된 사용자의 ID 설정
+                .serverId("serverId 1")
+                .serverProfile("서버 사진1")
+                .serverName("서버 이름1")
+                .mentionUserId(request.getMentionUserId())
+                .mentionUserName("이가은")
+                .message("message1")
+                .chatRoomName("chatRoomName1")
+                .chatRoomId(1L)
+                .categoryId(1L)
+                .categoryName("category1")
+                .mentionedUserId(request.getMentionUserId()) // 멘션된 사용자의 ID 설정
                 .build();
     }
 

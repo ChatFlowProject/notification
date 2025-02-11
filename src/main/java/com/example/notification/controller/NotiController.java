@@ -32,7 +32,7 @@ public class NotiController {
         return new BaseResponse<>(mentionNotiRes);
     }
 
-    // 3. 친구 요청 알림 생성 API
+    // 3. 친구 요청시 알림 생성 API
     @PostMapping("/friend-request")
     public ResponseEntity<Void> sendFriendRequestNotification(@RequestBody FriendRequestNotiReq request) {
         notificationService.sendFriendRequestNoti(request);

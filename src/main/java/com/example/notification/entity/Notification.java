@@ -1,31 +1,36 @@
 package com.example.notification.entity;
 
+import com.example.notification.common.NotificationStatus;
+import com.example.notification.common.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "notifications")
+@Entity
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @Column(nullable = false)
+    private Long recipientId; // 알림을 받은 사용자 ID
+
     @Enumerated(EnumType.STRING)
-    private NotiType type;
+    @Column(nullable = false)
+    private NotificationType type; // 알림 종류
 
-    private String message;
-    private boolean Viewed; // 읽음 여부 플래그
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationStatus status; // 읽음 상태
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private String message; // 알림 메시지
 
+    private LocalDateTime createdAt = LocalDateTime.now(); // 생성 시간
 }
