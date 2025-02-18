@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mariadb:
     image: mariadb:11.5.2
-    container_name: mariadb
+    container_name: mariadb_noti
     environment:
       MARIADB_ROOT_PASSWORD: qwer1234
       MARIADB_DATABASE: noti

@@ -1,5 +1,6 @@
 package com.example.notification.config;
 
+import com.example.notification.config.FeignErrorDecoder;
 import feign.RequestInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.http.HttpHeaders;

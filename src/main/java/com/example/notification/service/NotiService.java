@@ -3,20 +3,19 @@ package com.example.notification.service;
 import com.example.notification.common.ApiStatus;
 import com.example.notification.common.NotificationStatus;
 import com.example.notification.common.NotificationType;
-import com.example.notification.config.MemberServiceClient;
+import com.example.notification.config.member_server.MemberServiceClient;
 import com.example.notification.dto.ApiResponse;
 import com.example.notification.dto.MemberResponse;
 import com.example.notification.dto.req.ChatMessageNotiReq;
 import com.example.notification.dto.req.FriendRequestAcceptReq;
 import com.example.notification.dto.req.FriendRequestNotiReq;
 import com.example.notification.dto.req.MentionNotiReq;
-import com.example.notification.dto.res.ChatMessageNotiRes;
-import com.example.notification.dto.res.FriendRequestAcceptRes;
-import com.example.notification.dto.res.FriendRequestNotiRes;
-import com.example.notification.dto.res.MentionNotiRes;
+import com.example.notification.dto.res.*;
 import com.example.notification.entity.Notification;
 import com.example.notification.entity.NotificationMessage;
 import com.example.notification.repository.NotiRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -25,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -40,29 +37,92 @@ public class NotiService {
     private final MemberServiceClient memberServiceClient;
     private final NotiRepository notiRepository;
 
+    // 클라이언트가 SSE 연결을 구독
+    public SseEmitter subscribe(UUID userId) {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        emitters.put(userId, emitter);
+        emitter.onCompletion(() -> emitters.remove(userId));
+        emitter.onTimeout(() -> emitters.remove(userId));
+        return emitter;
+    }
+
+    // 특정 클라이언트에게 이벤트 전송
+    public void sendEventsToClients(List<UUID> receiverIds, UUID senderId, Long notiId, NotificationType type) throws JsonProcessingException {
+        MemberResponse sender = findMemberById(senderId);
+        Notification notification = findNotificationById(notiId);
+        for (UUID receiverId : receiverIds) {
+            sendNotificationToReceiver(receiverId, sender, notification, type);
+        }
+    }
+
+    // 알림 상태 업데이트 (읽음 처리)
+    public void updateNotificationStatus(Long notiId) {
+        Notification notification = findNotificationById(notiId); // 알림 조회
+        notification.setStatus(NotificationStatus.READ); // 상태를 읽음(READ)으로 변경
+        notiRepository.save(notification); // 변경된 상태를 저장
+    }
+
     // redis pub/sub 리스너 초기화
     @PostConstruct
-    public void initRedisListener(){
-        redisTemplate.getConnectionFactory().getConnection().subscribe((message, pattern)-> {
+    public void initRedisListener() {
+        redisTemplate.getConnectionFactory().getConnection().subscribe((message, pattern) -> {
             String receivedMessage = new String(message.getBody());
-            System.out.println("received message from redis"+receivedMessage);
-            // 모든 활성화된 클라이언트로 메시지 전송
-            emitters.forEach((userId, emitter)-> {
-                try {
-                    emitter.send(SseEmitter.event().name("notification").data(receivedMessage));
-                } catch(IOException e){
-                    emitters.remove(userId);
-                }
-            });
+            broadcastToEmitters(receivedMessage);
         }, "notification-channel".getBytes());
     }
-    // 클라이언트가 SSE 연결 구독
-    public SseEmitter subscribe(UUID userId) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE); // 무제한 대기 시간 설정
-        emitters.put(userId, emitter); // 사용자 ID와 SseEmitter 매핑
-        emitter.onCompletion(() -> emitters.remove(userId)); // 완료 시 제거
-        emitter.onTimeout(() -> emitters.remove(userId)); // 타임아웃 시 제거
-        return emitter;
+
+    // 공통: 특정 사용자에게 알림 전송
+    private void sendNotificationToReceiver(UUID receiverId, MemberResponse sender, Notification notification, NotificationType type) throws JsonProcessingException {
+        SseEmitter emitter = emitters.get(receiverId);
+        if (emitter != null) {
+            Map<String, Object> notificationData = new HashMap<>();
+            notificationData.put("message", notification.getMessage());
+            notificationData.put("type", type);
+
+            if (sender != null) {
+                notificationData.put("sender", sender);
+            }
+            String jsonData = new ObjectMapper().writeValueAsString(notificationData);
+
+            try {
+                emitter.send(SseEmitter.event().name("notification").data(jsonData));
+            } catch (IOException e) {
+                emitters.remove(receiverId);
+            }
+        }
+    }
+
+    // 특정 알림 ID로 알림 조회
+    private Notification findNotificationById(Long notificationId) {
+        return notiRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Notification not found for ID: " + notificationId));
+    }
+
+    // 공통: 모든 활성화된 클라이언트로 메시지 브로드캐스트
+    private void broadcastToEmitters(String message) {
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event().name("notification").data(message));
+            } catch (IOException e) {
+                emitters.remove(userId);
+            }
+        });
+    }
+
+    // 나의 알림 조회
+    public List<ReadMyNotiRes> readMyNotifications(UUID userId) {
+        MemberResponse user = findMemberById(userId);
+        List<Notification> notifications = notiRepository.findByRecipientId(user.getId());
+        return notifications.stream()
+                .map(notification -> ReadMyNotiRes.builder()
+                        .message(notification.getMessage())
+                        .idx(notification.getId())
+                        .type(notification.getType().ordinal()) // enum 값을 숫자로 변환
+                        .status(notification.getStatus().ordinal()) // enum 값을 숫자로 변환
+                        .time(notification.getCreatedAt())
+                        .userNotiId(userId)
+                        .build())
+                .toList();
     }
 
     // 모든 멤버 조회 메서드
@@ -84,6 +144,21 @@ public class NotiService {
                 .filter(member -> member.getId().equals(memberId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Member not found for ID: " + memberId));
+    }
+
+    // 안읽은 알림 조회
+    public List<ReadMyNotiRes> getUnreadNotifications(UUID userId) {
+        List<Notification> notifications = notiRepository.findByRecipientIdAndStatus(userId, NotificationStatus.NOTREAD);
+        return notifications.stream()
+                .map(notification -> ReadMyNotiRes.builder()
+                        .message(notification.getMessage())
+                        .idx(notification.getId())
+                        .type(notification.getType().ordinal()) // Enum 값을 숫자로 변환
+                        .status(notification.getStatus().ordinal()) // Enum 값을 숫자로 변환
+                        .time(notification.getCreatedAt())
+                        .userNotiId(userId)
+                        .build())
+                .toList();
     }
 
     // 멘션 알림
@@ -139,6 +214,9 @@ public class NotiService {
     }
 
     // 채팅 메시지 알림 전송
+
+
+
     // 채팅 메시지 알림 전송
     public ChatMessageNotiRes sendChatMessageNoti(ChatMessageNotiReq request) {
         // 1. 대상 사용자 정보 조회
@@ -159,7 +237,7 @@ public class NotiService {
                 .build();
     }
 
-    public FriendRequestAcceptRes acceptFriendRequestNoti(FriendRequestAcceptReq request){
+    public FriendRequestAcceptRes acceptFriendRequestNoti(FriendRequestAcceptReq request) {
         // 1. 요청 보낸 사용자와 수락한 사용자 정보 조회
         MemberResponse requester = findMemberById(request.getRequesterId());
         MemberResponse accepter = findMemberById(request.getAccepterId());
@@ -171,7 +249,7 @@ public class NotiService {
                 .build();
         notiRepository.save(notification);
         // 3. redis를 통해 실시간 알림 전송
-        String message = accepter.getName()+"님이 친구 요청을 수락했습니다.";
+        String message = accepter.getName() + "님이 친구 요청을 수락했습니다.";
         sendNotiWithMessageToRedis(request.getRequesterId(), message);
 
         return FriendRequestAcceptRes.builder()
@@ -179,8 +257,6 @@ public class NotiService {
                 .accepterName(accepter.getName())
                 .build();
     }
-
-
 
 
     private void sendNotiToRedis(UUID userId) {
@@ -203,4 +279,6 @@ public class NotiService {
         }
     }
 }
+
+
 

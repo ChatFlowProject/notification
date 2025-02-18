@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-    public interface NotiRepository extends JpaRepository<Notification, UUID> {
-        List<Notification> findByrecipientId(UUID userId);
-        List<Notification> findByrecipientIdAndStatus(UUID recipientId, NotificationStatus status); // 특정 사용자와 읽음 상태로 조회
+public interface NotiRepository extends JpaRepository<Notification, Long> {
+        List<Notification> findByRecipientId(UUID recipientId);
+        List<Notification> findByRecipientIdAndStatus(UUID recipientId, NotificationStatus status); // 특정 사용자와 읽음 상태로 조회
+
+        void deleteByRecipientId(UUID recipientId);
 }
