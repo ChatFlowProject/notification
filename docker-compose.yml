@@ -3,12 +3,12 @@ version: '3.8'
 services:
   mariadb:
     image: mariadb:11.5.2
-    container_name: mariadb_noti
+    container_name: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: qwer1234
       MARIADB_DATABASE: noti
     ports:
-      - "3307:3306"
+      - "3309:3306"
     volumes:
       - ./db/:/var/lib/mysql
 

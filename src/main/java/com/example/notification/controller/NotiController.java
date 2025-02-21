@@ -74,6 +74,7 @@ public class NotiController {
         notificationService.updateNotificationStatus(notiId);
         return new BaseResponse<>(BaseResponseStatus.NOTI_UPDATE_SUCCESS);
     }
+
 }
 
 

@@ -14,6 +14,11 @@ java {
     }
 }
 
+bootJar {
+    archiveFileName = 'noti.jar'
+}
+
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
