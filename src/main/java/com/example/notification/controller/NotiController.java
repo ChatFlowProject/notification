@@ -35,7 +35,7 @@ public class NotiController {
     // 특정 클라이언트에게 이벤트 전송
     @PostMapping("/send")
     public void sendEventToClient(@RequestBody NotiReq notiReq) throws JsonProcessingException {
-        notificationService.sendEventsToClients(notiReq.getReceiverIds(), notiReq.getSenderId(), notiReq.getNotiId(), notiReq.getType());
+        notificationService.sendEventsToClients(notiReq.getReceiverIds(), notiReq.getSenderId(), notiReq.getType());
     }
 
     // 모든 멤버 조회 메서드
@@ -74,7 +74,6 @@ public class NotiController {
         notificationService.updateNotificationStatus(notiId);
         return new BaseResponse<>(BaseResponseStatus.NOTI_UPDATE_SUCCESS);
     }
-
 }
 
 

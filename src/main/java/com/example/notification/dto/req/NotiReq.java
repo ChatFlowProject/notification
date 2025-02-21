@@ -12,6 +12,5 @@ import java.util.UUID;
 public class NotiReq {
     List<UUID> receiverIds;
     UUID senderId;
-    Long notiId;
     NotificationType type;
 }

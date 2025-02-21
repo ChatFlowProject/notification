@@ -17,6 +17,6 @@ import java.util.List;
 public interface MemberServiceClient {
 
     // 친구 목록 API 호출
-    @GetMapping("/members/friends") // 멤버 서비스의 실제 경로와 일치해야 함
+    @GetMapping("/admins/members") // 멤버 서비스의 실제 경로와 일치해야 함
     ApiResponse<List<MemberResponse>> getAllMembers();
 }
