@@ -62,7 +62,7 @@ public class NotiController {
 
     // 나의 알림 조회
     @GetMapping("/my")
-    public BaseResponse<List<ReadMyNotiRes>> readMyNoti(UUID userId) {
+    public BaseResponse<List<ReadMyNotiRes>> readMyNoti(@RequestBody UUID userId) {
         MemberResponse user = findMemberById(userId);
         List<ReadMyNotiRes> response = notificationService.readMyNotifications(userId);
         return new BaseResponse<>(response);

@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.1'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.springframework.cloud.contract' version '4.2.0'
 }
 
 group = 'com.example'
@@ -10,27 +9,24 @@ version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(17) // Java 17 사용
     }
+}
+
+springBoot {
+    mainClass = 'com.example.notification.NotificationApplication' // 메인 클래스 경로 설정
 }
 
 bootJar {
-    archiveFileName = 'noti.jar'
+    archiveFileName = 'notification-0.0.1-SNAPSHOT.jar' // JAR 파일 이름 설정
 }
 
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+jar {
+    enabled = false // 기본 JAR 비활성화
 }
 
 repositories {
     mavenCentral()
-}
-
-ext {
-    set('springCloudVersion', "2024.0.0")
 }
 
 dependencies {
@@ -39,32 +35,24 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'mysql:mysql-connector-java:8.0.33'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.mariadb.jdbc:mariadb-java-client'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.mockito', module: 'mockito-core'
+    }
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // swagger 관련
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.563'
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis' // Redis Starter
-    implementation 'com.fasterxml.jackson.core:jackson-databind' // JSON 직렬화/역직렬화
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
-
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.0"
     }
-}
-
-contracts {
-}
-
-tasks.named('contractTest') {
-    useJUnitPlatform()
 }
 
 tasks.named('test') {
