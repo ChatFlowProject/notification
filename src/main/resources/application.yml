@@ -3,13 +3,13 @@ spring:
     name: notification-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://34.64.47.229:3306/mysql8?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: test
-    password: 1234
+    url: jdbc:mysql://34.64.47.229:3306/noti?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: qwer1234
   jpa:
     database: mysql
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate.format_sql: true
@@ -45,5 +45,3 @@ feign:
       default:
         connectTimeout: 5000
         readTimeout: 5000
-
-

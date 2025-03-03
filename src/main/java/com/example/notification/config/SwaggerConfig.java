@@ -33,8 +33,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Chat Flow NotiService REST API Specifications")
-                .description("Chat Flow NotiService Specification")
+                .title("Chat Flow ChatService REST API Specifications")
+                .description("Chat Flow ChatService Specification")
                 .version(version);
     }
 }

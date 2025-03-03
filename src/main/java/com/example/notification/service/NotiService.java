@@ -128,8 +128,8 @@ public class NotiService {
     }
 
     // 나의 알림 조회
-    public List<ReadMyNotiRes> readMyNotifications(UUID userId) {
-        List<Notification> notifications = notiRepository.findByRecipientId(userId);
+    public List<ReadMyNotiRes> readMyNotifications(MemberResponse user) {
+        List<Notification> notifications = notiRepository.findByRecipientId(user.getId());
         return notifications.stream()
                 .map(notification -> ReadMyNotiRes.builder()
                         .message(notification.getMessage())
@@ -137,10 +137,11 @@ public class NotiService {
                         .type(notification.getType().ordinal())
                         .status(notification.getStatus().ordinal())
                         .time(notification.getCreatedAt())
-                        .userNotiId(userId)
+                        .userNotiId(user.getId())
                         .build())
                 .toList();
     }
+
 
     // 안 읽은 알림 조회
     public List<ReadMyNotiRes> getUnreadNotifications(UUID userId) {
