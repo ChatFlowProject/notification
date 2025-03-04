@@ -1,5 +1,8 @@
 package com.example.notification.dto.res;
 
+import com.example.notification.common.MemberType;
+import com.example.notification.common.NotificationStatus;
+import com.example.notification.common.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,8 +14,8 @@ import java.util.UUID;
 public class ReadMyNotiRes {
     private String message;
     private Long idx;
-    private int type;
-    private int status;
+    private NotificationType type;
+    private NotificationStatus status;
     private LocalDateTime time;
     private UUID userNotiId;
 }

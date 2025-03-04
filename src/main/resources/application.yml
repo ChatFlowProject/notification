@@ -8,7 +8,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
