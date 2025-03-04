@@ -22,8 +22,9 @@ public class Notification {
     private Long id;
 
     @NonNull
-    @Column(nullable = false, columnDefinition = "CHAR(36)")
-    private UUID recipientId; // 알림을 받은 사용자 ID
+    @Column(nullable = false, columnDefinition = "BINARY(16)")
+    private UUID recipientId;
+
 
     @NonNull
     @Enumerated(EnumType.STRING)
