@@ -1,0 +1,66 @@
+server:
+  port: 8080
+
+tag:
+  version: 1.0.0 # ${VERSION}
+
+chatflow:
+  http-url: ${CHATFLOW_HTTP_URL}
+  https-url: ${CHATFLOW_HTTPS_URL}
+
+spring:
+  application:
+    name: chat
+  profiles:
+    active: ${PROFILE_ACTIVE}
+  datasource:
+    driver-class-name: ${DB_DRIVER_CLASS_NAME}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+  kafka:
+    bootstrap-servers: "kafka-controller-headless.kafka.svc.cluster.local:9092"
+    properties:
+      security.protocol: PLAINTEXT # ???? ??
+      bootstrap.servers.protocol.map: CLIENT:PLAINTEXT
+      client.id: "notification-kafka-client" # ????? ID ??
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: "notification-service-group"
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "shop.flowchat.chat.dto.kafka,shop.flowchat.notification.command.dto"
+    #      isolation-level: read_committed
+    #      enable-auto-commit: true
+  #    streams:
+  #      application-id: "team-streams-app"
+  #      processing.guarantee: exactly_once_v2
+  #      properties:
+  #        commit.interval.ms: 100
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  paths-to-match: /**
+  swagger-ui:
+    path: /notification/swagger
+    display-request-duration: true
+    groups-order: desc
+    operations-sorter: method
+    disable-swagger-default-url: true
+  api-docs:
+    path: /notification/v3/api-docs
+    groups:
+      enabled: true
