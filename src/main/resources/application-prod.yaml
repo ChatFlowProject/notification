@@ -1,0 +1,19 @@
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  kafka:
+    bootstrap-servers: "kafka-controller-headless.kafka.svc.cluster.local:9092"
+    properties:
+      security.protocol: PLAINTEXT
+      bootstrap.servers.protocol.map: CLIENT:PLAINTEXT
+      client.id: "notification-kafka-client"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: "notification-service-group"
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
