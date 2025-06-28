@@ -11,7 +11,7 @@ import shop.flowchat.notification.command.service.MentionCommandService;
 public class MentionCreateConsumer {
     private final MentionCommandService mentionCommandService;
 
-    @KafkaListener(topics = "mention-create", groupId = "notification-group")
+    @KafkaListener(topics = "mention", groupId = "notification-group")
     public void mentionCreateEvent(MentionCreateEvent event) {
         mentionCommandService.createMention(event);
     }

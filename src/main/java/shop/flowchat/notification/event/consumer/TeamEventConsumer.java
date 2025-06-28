@@ -13,7 +13,7 @@ import shop.flowchat.notification.query.NotificationTeamQuery;
 public class TeamEventConsumer {
     private final NotificationTeamQuery teamQuery;
 
-    @KafkaListener(topics = "team-updated", groupId = "notification-group")
+    @KafkaListener(topics = "team", groupId = "notification-group")
     public void consume(TeamUpdatedEvent event) {
         log.info("TeamUpdatedEvent : {}", event);
         teamQuery.update(event);

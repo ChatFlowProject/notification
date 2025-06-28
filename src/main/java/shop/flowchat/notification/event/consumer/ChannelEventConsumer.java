@@ -14,7 +14,7 @@ import shop.flowchat.notification.query.NotificationChannelQuery;
 public class ChannelEventConsumer {
     private final NotificationChannelQuery channelQuery;
 
-    @KafkaListener(topics = "channel-updated", groupId = "notification-group")
+    @KafkaListener(topics = "channel", groupId = "notification-group")
     public void consume(ChannelUpdatedEvent event) {
         log.info("ChannelUpdatedEvent : {}", event);
         channelQuery.update(event);
