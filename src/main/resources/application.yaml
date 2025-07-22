@@ -41,7 +41,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "shop.flowchat.chat.dto.kafka,shop.flowchat.notification.command.dto"
+        spring.json.trusted.packages: shop.flowchat.notification.command.dto
+        spring.json.type.mapping: shop.flowchat.chat.dto.kafka.MentionCreateEvent:shop.flowchat.notification.command.dto.MentionCreateEvent
     #      isolation-level: read_committed
     #      enable-auto-commit: true
   #    streams:
