@@ -17,10 +17,7 @@ public class MemberEventConsumer {
     private final MemberReadModelCommandService service;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(
-            topics = "member",
-            containerFactory = "stringKafkaListener"
-    )
+    @KafkaListener(topics = "member")
     public void consume(ConsumerRecord<String, String> record, @Header(name = "eventType", required = false) String eventType) {
         try {
             MemberEventPayload payload = objectMapper.readValue(record.value(), MemberEventPayload.class);

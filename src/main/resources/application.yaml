@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 tag:
   version: ${VERSION}
@@ -34,15 +34,12 @@ spring:
       client.id: "notification-kafka-client" # ????? ID ??
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringDeserializer
     consumer:
       group-id: "notification-service-group"
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: shop.flowchat.notification.command.dto
-        spring.json.type.mapping: shop.flowchat.chat.dto.kafka.MentionCreateEvent:shop.flowchat.notification.command.dto.MentionCreateEvent
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     #      isolation-level: read_committed
     #      enable-auto-commit: true
   #    streams:

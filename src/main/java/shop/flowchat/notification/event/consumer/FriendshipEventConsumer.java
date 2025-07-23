@@ -17,10 +17,7 @@ public class FriendshipEventConsumer {
     private final NotificationCommandService service;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(
-            topics = "friendship",
-            containerFactory = "stringKafkaListener"
-    )
+    @KafkaListener(topics = "friendship")
     public void consume(ConsumerRecord<String, String> record, @Header(name = "eventType", required = false) String eventType) {
         try {
             FriendshipEventPayload payload = objectMapper.readValue(record.value(), FriendshipEventPayload.class);
