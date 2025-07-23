@@ -7,14 +7,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import shop.flowchat.notification.command.service.MemberReadModelService;
+import shop.flowchat.notification.command.service.MemberReadModelCommandService;
 import shop.flowchat.notification.event.payload.MemberEventPayload;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class MemberEventConsumer {
-    private final MemberReadModelService service;
+    private final MemberReadModelCommandService service;
     private final ObjectMapper objectMapper;
 
     @KafkaListener(

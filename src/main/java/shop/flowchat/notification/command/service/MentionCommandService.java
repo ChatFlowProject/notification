@@ -14,6 +14,7 @@ import shop.flowchat.notification.domain.mention.MentionType;
 import shop.flowchat.notification.domain.team.NotificationTeam;
 import shop.flowchat.notification.infrastructure.repository.mention.MentionMemberRepository;
 import shop.flowchat.notification.infrastructure.repository.mention.MentionRepository;
+import shop.flowchat.notification.query.MemberReadModelQuery;
 import shop.flowchat.notification.query.NotificationChannelQuery;
 import shop.flowchat.notification.sse.dto.MentionSseEvent;
 import shop.flowchat.notification.sse.service.MentionSseService;
@@ -26,7 +27,7 @@ import java.util.UUID;
 public class MentionCommandService {
     private final MentionRepository mentionRepository;
     private final MentionMemberRepository mentionMemberRepository;
-    private final MemberReadModelService memberReadModelService;
+    private final MemberReadModelQuery memberReadModelQuery;
     private final NotificationChannelQuery channelQuery;
     private final MentionSseService mentionSseService;
 
@@ -47,7 +48,7 @@ public class MentionCommandService {
                 .toList();
         mentionMemberRepository.saveAll(mentionMembers);
 
-        MemberInfo sender = MemberInfo.from(memberReadModelService.getMemberById(event.senderId()));
+        MemberInfo sender = MemberInfo.from(memberReadModelQuery.getMemberById(event.senderId()));
 
         MentionSseEvent sseEvent = MentionSseEvent.from(
                 memberIds,

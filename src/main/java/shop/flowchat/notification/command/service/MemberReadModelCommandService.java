@@ -7,27 +7,18 @@ import shop.flowchat.notification.domain.member.MemberReadModel;
 import shop.flowchat.notification.event.payload.MemberEventPayload;
 import shop.flowchat.notification.infrastructure.repository.member.MemberReadModelRepository;
 
-import java.util.UUID;
-
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class MemberReadModelService {
+public class MemberReadModelCommandService {
 
     private final MemberReadModelRepository repository;
 
-    @Transactional
     public void create(MemberEventPayload payload) {
         if (repository.existsById(payload.id())) return;
         repository.save(MemberReadModel.create(payload));
     }
 
-    @Transactional(readOnly = true)
-    public MemberReadModel getMemberById(UUID memberId) {
-        return repository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다 : " + memberId));
-    }
-
-    @Transactional
     public void updateProfile(MemberEventPayload payload) { // upsert
         repository.findById(payload.id())
                 .ifPresentOrElse(
@@ -44,7 +35,6 @@ public class MemberReadModelService {
                 );
     }
 
-    @Transactional
     public void updateStatus(MemberEventPayload payload) { // upsert
         repository.findById(payload.id())
                 .ifPresentOrElse(
@@ -61,7 +51,6 @@ public class MemberReadModelService {
                 );
     }
 
-    @Transactional
     public void delete(MemberEventPayload payload) {
         repository.deleteById(payload.id());
     }
