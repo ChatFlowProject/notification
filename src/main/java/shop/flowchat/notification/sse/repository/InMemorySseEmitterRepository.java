@@ -1,7 +1,9 @@
 package shop.flowchat.notification.sse.repository;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import shop.flowchat.notification.sse.dto.SseEventPayload;
 
 import java.io.IOException;
 import java.util.Map;
@@ -22,15 +24,17 @@ public class InMemorySseEmitterRepository implements SseEmitterRepository {
     }
 
     @Override
-    public void send(UUID memberId, Object data) {
-        SseEmitter emitter = emitters.get(memberId);
+    public void send(SseEventPayload payload) {
+        UUID id = payload.getReceiverId();
+        SseEmitter emitter = emitters.get(id);
         if (emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("mention-notification")
-                        .data(data));
+                        .name(payload.getEventName())
+                        .id(payload.getReceiverId().toString())
+                        .data(payload, MediaType.APPLICATION_JSON));
             } catch (IOException e) {
-                emitters.remove(memberId);
+                emitters.remove(id);
             }
         }
     }
