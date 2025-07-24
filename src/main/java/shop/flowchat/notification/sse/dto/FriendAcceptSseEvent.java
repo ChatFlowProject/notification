@@ -5,19 +5,19 @@ import shop.flowchat.notification.common.dto.MemberInfo;
 import java.util.UUID;
 
 public record FriendAcceptSseEvent(
-        UUID senderId,
-        MemberInfo receiver
+        MemberInfo sender,
+        UUID receiverId
 ) implements SseEventPayload {
-    public static FriendAcceptSseEvent from(UUID senderId, MemberInfo receiver) {
+    public static FriendAcceptSseEvent from(MemberInfo sender, UUID receiverId) {
         return new FriendAcceptSseEvent(
-                senderId,
-                receiver
+                sender,
+                receiverId
         );
     }
 
     @Override
     public UUID getReceiverId() {
-        return receiver.id();
+        return receiverId;
     }
 
     @Override
