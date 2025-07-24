@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import shop.flowchat.notification.domain.member.MemberReadModel;
 import shop.flowchat.notification.infrastructure.repository.member.MemberReadModelRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +18,10 @@ public class MemberReadModelQuery {
     public MemberReadModel getMemberById(UUID memberId) {
         return repository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다 : " + memberId));
+    }
+
+    public List<MemberReadModel> getAllMembersById(List<UUID> memberIds) {
+        return repository.findAllById(memberIds);
     }
 
 }

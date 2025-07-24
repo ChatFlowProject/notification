@@ -31,8 +31,8 @@ public class FriendshipEventConsumer {
             }
 
             switch (eventType) {
-                case "friendshipRequest" -> service.createFriendRequestNoti(payload);
-                case "friendshipAccept" -> service.createFriendAcceptNoti(payload);
+                case "friendshipRequest" -> service.createFriendRequestNoti(payload.fromMemberId(), payload.toMemberId());
+                case "friendshipAccept" -> service.createFriendAcceptNoti(payload.fromMemberId(), payload.toMemberId());
                 default -> log.warn("Unhandled friendship eventType: {}", eventType);
             }
 
