@@ -98,6 +98,13 @@ public class NotificationCommandService {
         notifications.forEach(Notification::markAsRead);
     }
 
+    public void markAllNotificationsAsRead(String token) {
+        UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        List<Notification> unreadNotifications = notificationRepository.findAllByReceiverIdAndIsRead(memberId, false);
+
+        unreadNotifications.forEach(Notification::markAsRead);
+    }
+
     public void deleteNotification(String token, Long notificationId) {
         UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
         Notification notification = notificationQuery.getNotificationById(notificationId);
@@ -110,7 +117,7 @@ public class NotificationCommandService {
     public void deleteReadNotifications(String token) {
         UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
 
-        List<Notification> readNotifications = notificationRepository.findAllByReceiverIdAndIsReadTrue(memberId);
+        List<Notification> readNotifications = notificationRepository.findAllByReceiverIdAndIsRead(memberId, true);
         if (readNotifications.isEmpty()) return;
 
         notificationRepository.deleteAllInBatch(readNotifications);
@@ -120,6 +127,5 @@ public class NotificationCommandService {
         UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
         notificationRepository.deleteAllByReceiverId(memberId);
     }
-
 
 }

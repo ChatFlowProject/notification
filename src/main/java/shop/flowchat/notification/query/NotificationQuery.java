@@ -31,4 +31,11 @@ public class NotificationQuery {
                 .collect(Collectors.toList());
     }
 
+    public List<NotificationResponse> getUnreadNotifications(String token) {
+        UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
+        return notificationRepository.findAllByReceiverIdAndIsReadOrderByCreatedAt(memberId, false).stream()
+                .map(NotificationResponse::from)
+                .collect(Collectors.toList());
+    }
+
 }

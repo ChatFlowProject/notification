@@ -11,7 +11,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("SELECT DISTINCT n FROM Notification n JOIN FETCH n.sender WHERE n.receiverId = :receiverId ORDER BY n.createdAt DESC")
     List<Notification> findAllByReceiverIdOrderByCreatedAt(UUID receiverId);
 
-    List<Notification> findAllByReceiverIdAndIsReadTrue(UUID receiverId);
+    @Query("SELECT DISTINCT n FROM Notification n JOIN FETCH n.sender WHERE n.receiverId = :receiverId AND n.isRead = :isRead ORDER BY n.createdAt DESC")
+    List<Notification> findAllByReceiverIdAndIsReadOrderByCreatedAt(UUID receiverId, Boolean isRead);
+
+    List<Notification> findAllByReceiverIdAndIsRead(UUID receiverId, Boolean isRead);
 
     void deleteAllByReceiverId(UUID receiverId);
 

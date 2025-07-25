@@ -20,11 +20,18 @@ public class NotificationController {
     private final NotificationQuery notificationQuery;
     private final NotificationCommandService notificationCommandService;
 
-    @Operation(summary = "나의 모든 알림 조회")
+    @Operation(summary = "모든 알림 조회")
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getAllNotifications(
             @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(notificationQuery.getAllNotifications(token));
+    }
+
+    @Operation(summary = "읽지 않은 알림 조회")
+    @GetMapping
+    public ResponseEntity<List<NotificationResponse>> getUnreadNotifications(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(notificationQuery.getUnreadNotifications(token));
     }
 
     @Operation(summary = "알림 읽음 처리")
@@ -43,6 +50,14 @@ public class NotificationController {
             @RequestBody List<Long> notificationIds) {
         notificationCommandService.markNotificationsAsRead(token, notificationIds);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "전체 알림 읽음 처리")
+    @PatchMapping("/read-all")
+    public ResponseEntity<Void> markAllNotificationsAsRead(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
+        notificationCommandService.markAllNotificationsAsRead(token);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "알림 삭제")
