@@ -1,4 +1,4 @@
-package shop.flowchat.notification.presentation;
+package shop.flowchat.notification.presentation.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
