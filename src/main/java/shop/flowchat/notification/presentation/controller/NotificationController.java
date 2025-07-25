@@ -28,7 +28,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "읽지 않은 알림 조회")
-    @GetMapping
+    @GetMapping("/unread")
     public ResponseEntity<List<NotificationResponse>> getUnreadNotifications(
             @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(notificationQuery.getUnreadNotifications(token));
