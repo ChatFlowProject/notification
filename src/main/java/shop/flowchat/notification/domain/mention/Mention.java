@@ -6,9 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import shop.flowchat.notification.command.dto.MentionCreateEvent;
-import shop.flowchat.notification.common.dto.ChannelInfo;
-import shop.flowchat.notification.domain.channel.NotificationChannel;
+import shop.flowchat.notification.event.payload.MentionEventPayload;
+import shop.flowchat.notification.domain.channel.ChannelReadModel;
 
 @Entity
 @Getter
@@ -40,7 +39,7 @@ public class Mention {
         this.members = new ArrayList<>();
     }
 
-    public static Mention create(MentionCreateEvent event, NotificationChannel channel) {
+    public static Mention create(MentionEventPayload event, ChannelReadModel channel) {
         return Mention.builder()
                 .messageId(event.messageId())
                 .channelId(channel.getId())

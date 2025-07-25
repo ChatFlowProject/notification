@@ -3,9 +3,8 @@ package shop.flowchat.notification.sse.dto;
 import shop.flowchat.notification.common.dto.*;
 
 import java.time.LocalDateTime;
-import shop.flowchat.notification.domain.team.NotificationTeam;
 
-public record MentionPayload(
+public record MentionSsePayload(
         MemberInfo sender,
         TeamInfo team,
         ChannelInfo channel,
@@ -13,8 +12,8 @@ public record MentionPayload(
         String content,
         LocalDateTime createdAt
 ) {
-    public static MentionPayload from(MentionSseEvent event) {
-        return new MentionPayload(
+    public static MentionSsePayload from(MentionSseEvent event) {
+        return new MentionSsePayload(
                 event.sender(),
                 event.team(),
                 event.channel(),

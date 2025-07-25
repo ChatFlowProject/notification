@@ -1,8 +1,7 @@
 package shop.flowchat.notification.sse.dto;
 
 import java.io.Serializable;
-import org.apache.commons.lang3.tuple.Pair;
-import shop.flowchat.notification.command.dto.MentionCreateEvent;
+import shop.flowchat.notification.event.payload.MentionEventPayload;
 import shop.flowchat.notification.common.dto.MemberInfo;
 import shop.flowchat.notification.common.dto.TeamInfo;
 import shop.flowchat.notification.common.dto.ChannelInfo;
@@ -20,7 +19,7 @@ public record MentionSseEvent(
     String content,
     LocalDateTime createdAt
 ) implements Serializable {
-    public static MentionSseEvent from(List<UUID> receiverIds, MemberInfo sender, TeamInfo team, ChannelInfo channel , MentionCreateEvent event) {
+    public static MentionSseEvent from(List<UUID> receiverIds, MemberInfo sender, TeamInfo team, ChannelInfo channel , MentionEventPayload event) {
         return new MentionSseEvent(
                 receiverIds,
                 sender,

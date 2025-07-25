@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import shop.flowchat.notification.sse.dto.MentionSseEvent;
-import shop.flowchat.notification.sse.dto.MentionPayload;
+import shop.flowchat.notification.sse.dto.MentionSsePayload;
 import shop.flowchat.notification.sse.repository.SseEmitterRepository;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class MentionSseService {
             SseEmitter emitter = emitterRepository.get(receiverId);
             if (emitter != null) {
                 try {
-                    MentionPayload payload = MentionPayload.from(event);
+                    MentionSsePayload payload = MentionSsePayload.from(event);
                     emitter.send(SseEmitter.event()
                             .name("mention")
                             .data(payload));
