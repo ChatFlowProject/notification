@@ -64,3 +64,6 @@ springdoc:
     path: /notification/v3/api-docs
     groups:
       enabled: true
+
+jwt:
+  secret-key: user_token_for_signature_must_be_at_least_256_bits_in_HMAC_signature_algorithms
