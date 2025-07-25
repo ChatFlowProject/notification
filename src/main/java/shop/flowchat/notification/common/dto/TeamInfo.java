@@ -1,6 +1,6 @@
 package shop.flowchat.notification.common.dto;
 
-import shop.flowchat.notification.domain.team.NotificationTeam;
+import shop.flowchat.notification.domain.team.TeamReadModel;
 
 import java.util.UUID;
 
@@ -9,7 +9,7 @@ public record TeamInfo(
     String name,
     String iconUrl
 ) {
-    public static TeamInfo from(NotificationTeam team) {
+    public static TeamInfo from(TeamReadModel team) {
         return new TeamInfo(
                 team.getId(),
                 team.getName(),
