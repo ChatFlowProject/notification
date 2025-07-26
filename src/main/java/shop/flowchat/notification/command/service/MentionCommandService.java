@@ -3,6 +3,7 @@ package shop.flowchat.notification.command.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import shop.flowchat.notification.domain.category.CategoryReadModel;
 import shop.flowchat.notification.event.payload.MentionEventPayload;
 import shop.flowchat.notification.common.dto.ChannelInfo;
 import shop.flowchat.notification.common.dto.MemberInfo;
@@ -33,7 +34,8 @@ public class MentionCommandService {
 
     public void createMention(MentionEventPayload payload) {
         ChannelReadModel channel = mentionTargetQuery.findChannelByChatId(payload.chatId());
-        TeamReadModel team = mentionTargetQuery.findTeamById(channel.getTeamId());
+        CategoryReadModel category = mentionTargetQuery.findCategoryById(channel.getCategoryId());
+        TeamReadModel team = mentionTargetQuery.findTeamById(category.getTeamId());
 
         List<UUID> memberIds = mentionTargetQuery.resolveMentionTargetMembers(team.getId(), payload);
 
@@ -45,7 +47,7 @@ public class MentionCommandService {
                 .toList();
         mentionMemberRepository.saveAll(mentionMembers);
 
-        MemberInfo sender = MemberInfo.from(memberReadModelQuery.getMemberById(payload.memberId()));
+        MemberInfo sender = memberReadModelQuery.getMemberInfoById(payload.memberId());
 
         MentionSseEvent sseEvent = MentionSseEvent.from(
                 memberIds,
@@ -65,7 +67,8 @@ public class MentionCommandService {
         }
 
         ChannelReadModel channel = mentionTargetQuery.findChannelByChatId(payload.chatId());
-        TeamReadModel team = mentionTargetQuery.findTeamById(channel.getTeamId());
+        CategoryReadModel category = mentionTargetQuery.findCategoryById(channel.getCategoryId());
+        TeamReadModel team = mentionTargetQuery.findTeamById(category.getTeamId());
 
         List<UUID> oldMemberIds = mentionMemberRepository.findByMentionId(mention.getId())
                 .stream()
@@ -92,7 +95,7 @@ public class MentionCommandService {
         mentionMemberRepository.saveAll(addedMentionMembers);
 
         if (!toAdd.isEmpty()) {
-            MemberInfo sender = MemberInfo.from(memberReadModelQuery.getMemberById(payload.memberId()));
+            MemberInfo sender = memberReadModelQuery.getMemberInfoById(payload.memberId());
 
             MentionSseEvent sseEvent = MentionSseEvent.from(
                     toAdd,

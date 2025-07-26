@@ -1,4 +1,4 @@
-package shop.flowchat.notification.domain.channel;
+package shop.flowchat.notification.domain.category;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,11 +10,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChannelReadModel {
+public class CategoryReadModel {
     @Id
     private Long id;
     private String name;
-    private Long categoryId;
-    private UUID chatId;
-    private ChannelReadModelAccessType accessType;
+    private UUID teamId;
 }
