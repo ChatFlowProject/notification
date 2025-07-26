@@ -5,10 +5,12 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import shop.flowchat.notification.domain.category.CategoryReadModel;
 import shop.flowchat.notification.domain.channel.ChannelReadModel;
 import shop.flowchat.notification.domain.mention.MentionType;
 import shop.flowchat.notification.domain.team.TeamReadModel;
 import shop.flowchat.notification.event.payload.MentionEventPayload;
+import shop.flowchat.notification.infrastructure.repository.category.CategoryReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.channel.ChannelReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.team.TeamMemberReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.team.TeamReadModelRepository;
@@ -18,12 +20,18 @@ import shop.flowchat.notification.infrastructure.repository.team.TeamReadModelRe
 @Transactional(readOnly = true)
 public class MentionTargetQuery {
     private final TeamMemberReadModelRepository teamMemberRepository;
+    private final CategoryReadModelRepository categoryRepository;
     private final ChannelReadModelRepository channelRepository;
     private final TeamReadModelRepository teamRepository;
 
     public ChannelReadModel findChannelByChatId(UUID chatId) {
         return channelRepository.findByChatId(chatId)
                 .orElseThrow(() -> new IllegalArgumentException("채널을 찾을 수 없습니다: " + chatId));
+    }
+
+    public CategoryReadModel findCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다: " + categoryId));
     }
 
     public TeamReadModel findTeamById(UUID teamId) {
