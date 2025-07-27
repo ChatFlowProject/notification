@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,12 @@ public class MentionController {
     @Operation(summary = "멘션 목록 조회")
     @GetMapping
     public ResponseEntity<List<MentionMessageResponse>> getMentions(@Parameter(hidden = true) @RequestHeader("Authorization") String token,
-                                                                    @RequestParam int page, @RequestParam(defaultValue = "30") int pageSize) {
-        List<MentionMessageResponse> mentions = mentionQuery.findMentionsByMemberId(token, page, pageSize);
+                                                                    @RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "30") int pageSize,
+                                                                    @RequestParam(defaultValue = "true") Boolean includeEveryone,
+                                                                    @RequestParam(defaultValue = "true") Boolean includeAllTeams,
+                                                                    @RequestParam(required = false) UUID teamId) {
+        List<MentionMessageResponse> mentions = mentionQuery.findMentionsByMemberId(token, page, pageSize, includeEveryone, includeAllTeams, teamId);
         return ResponseEntity.ok(mentions);
     }
 }

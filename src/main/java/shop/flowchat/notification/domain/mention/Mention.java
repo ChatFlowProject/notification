@@ -1,6 +1,7 @@
 package shop.flowchat.notification.domain.mention;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,8 @@ public class Mention {
 
     private Long messageId;
     private Long channelId;
+    // 조회 성능 향상을 위한 컬럼 (필터링)
+    private UUID teamId;
 
     private LocalDateTime createdAt;
 

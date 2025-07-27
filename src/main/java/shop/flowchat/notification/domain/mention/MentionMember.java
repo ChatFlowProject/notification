@@ -11,7 +11,7 @@ import shop.flowchat.notification.domain.BaseEntity;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MentionMember extends BaseEntity {
+public class MentionMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

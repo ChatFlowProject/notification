@@ -32,12 +32,13 @@ public class MentionQuery {
     private final MentionMemberRepository mentionMemberRepository;
     private final MessageReadModelRepository messageRepository;
 
-    public List<MentionMessageResponse> findMentionsByMemberId(String token, int page,  int pageSize) {
+    public List<MentionMessageResponse> findMentionsByMemberId(String token, int page, int pageSize,
+                                                               boolean includeEveryone, boolean includeAllTeams, UUID teamId) {
         UUID memberId = jwtTokenProvider.getMemberIdFromToken(token);
         MemberInfo sender = memberQuery.getMemberInfoById(memberId);
 
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Direction.DESC, "createdAt"));
-        return mentionMemberRepository.findAllByMemberId(memberId, pageable).stream()
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return mentionMemberRepository.findAllWithMentionByFilters(memberId, includeEveryone, includeAllTeams, teamId, pageable).stream()
             .map(mentionMember -> mapToResponse(mentionMember.getMention(), sender))
             .filter(Objects::nonNull)
             .toList();
@@ -52,18 +53,15 @@ public class MentionQuery {
         ChannelReadModel channel = mentionTargetQuery.findChannelByChatId(chatId);
         if (channel == null) return null;
 
-        CategoryReadModel category = null;
-        TeamReadModel team = null;
-
-        if (channel.getAccessType() != ChannelReadModelAccessType.PRIVATE) {
-            Long categoryId = channel.getCategoryId();
-            category = mentionTargetQuery.findCategoryById(categoryId);
-            if (category == null) return null;
-
-            UUID teamId = category.getTeamId();
-            team = mentionTargetQuery.findTeamById(teamId);
-            if (team == null) return null;
+        if (channel.getAccessType() == ChannelReadModelAccessType.PRIVATE) {
+            return MentionMessageResponse.from(sender, null, null, channel, message);
         }
+
+        CategoryReadModel category = mentionTargetQuery.findCategoryById(channel.getCategoryId());
+        if (category == null) return null;
+
+        TeamReadModel team = mentionTargetQuery.findTeamById(category.getTeamId());
+        if (team == null) return null;
 
         return MentionMessageResponse.from(sender, team, category, channel, message);
     }
