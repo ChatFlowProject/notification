@@ -14,10 +14,10 @@ public class TeamReadModel {
     @Id
     private UUID id;
     private String name;
-    private String imageUrl;
+    private String iconUrl;
 
-    public void update(String name, String imageUrl) {
+    public void update(String name, String iconUrl) {
         this.name = name;
-        this.imageUrl = imageUrl;
+        this.iconUrl = iconUrl;
     }
 }

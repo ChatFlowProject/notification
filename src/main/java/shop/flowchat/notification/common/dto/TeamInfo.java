@@ -13,7 +13,7 @@ public record TeamInfo(
         return new TeamInfo(
                 team.getId(),
                 team.getName(),
-                team.getImageUrl()
+                team.getIconUrl()
         );
     }
 }
