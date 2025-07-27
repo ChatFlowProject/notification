@@ -4,12 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import shop.flowchat.notification.command.service.NotificationCommandService;
+import shop.flowchat.notification.presentation.dto.CursorResponse;
 import shop.flowchat.notification.presentation.dto.NotificationResponse;
 import shop.flowchat.notification.query.NotificationQuery;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Tag(name = "Notification Service API (인증 토큰 필요)")
@@ -22,16 +25,22 @@ public class NotificationController {
 
     @Operation(summary = "모든 알림 조회")
     @GetMapping
-    public ResponseEntity<List<NotificationResponse>> getAllNotifications(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(notificationQuery.getAllNotifications(token));
+    public ResponseEntity<CursorResponse<NotificationResponse>> getAllNotifications(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String token,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
+            @RequestParam(required = false) Long notificationId,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(notificationQuery.getAllNotifications(token, dateTime, notificationId, size));
     }
 
-    @Operation(summary = "읽지 않은 알림 조회")
+    @Operation(summary = "읽지 않은 알림 커서 기반 조회")
     @GetMapping("/unread")
-    public ResponseEntity<List<NotificationResponse>> getUnreadNotifications(
-            @Parameter(hidden = true) @RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(notificationQuery.getUnreadNotifications(token));
+    public ResponseEntity<CursorResponse<NotificationResponse>> getUnreadNotifications(
+            @Parameter(hidden = true) @RequestHeader("Authorization") String token,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
+            @RequestParam(required = false) Long notificationId,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(notificationQuery.getUnreadNotifications(token, dateTime, notificationId, size));
     }
 
     @Operation(summary = "알림 읽음 처리")
