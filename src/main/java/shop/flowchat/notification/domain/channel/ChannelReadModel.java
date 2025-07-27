@@ -1,6 +1,8 @@
 package shop.flowchat.notification.domain.channel;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -16,5 +18,6 @@ public class ChannelReadModel {
     private String name;
     private Long categoryId;
     private UUID chatId;
+    @Enumerated(EnumType.STRING)
     private ChannelReadModelAccessType accessType;
 }
