@@ -1,10 +1,12 @@
 package shop.flowchat.notification.infrastructure.repository.mention;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import shop.flowchat.notification.domain.mention.MentionMember;
 
 public interface MentionMemberRepository extends JpaRepository<MentionMember, Long> {
@@ -12,16 +14,31 @@ public interface MentionMemberRepository extends JpaRepository<MentionMember, Lo
     void deleteByMentionIdAndMemberIdIn(Long id, List<UUID> memberIds);
     void deleteByMentionId(Long id);
     @Query("""
-        select mm from MentionMember mm
-        join fetch mm.mention m where mm.memberId = :memberId
-        and (:includeEveryone = true or m.type <> 'EVERYONE') and (:includeAllTeams = true or m.teamId = :teamId)
-        order by m.createdAt desc
+        SELECT mm FROM MentionMember mm
+        JOIN FETCH mm.mention m WHERE mm.memberId = :memberId
+        AND (:includeEveryone = true OR m.type <> 'EVERYONE') AND (:includeAllTeams = true OR m.teamId = :teamId)
+        ORDER BY m.createdAt DESC, mm.id DESC
     """)
-    List<MentionMember> findAllWithMentionByFilters(
+    List<MentionMember> findLatestMentions(
             UUID memberId,
-            boolean includeEveryone,
-            boolean includeAllTeams,
+            Boolean includeEveryone,
+            Boolean includeAllTeams,
             UUID teamId,
             Pageable pageable
+    );
+
+    @Query("""
+        SELECT mm FROM MentionMember mm
+        JOIN FETCH mm.mention m WHERE mm.memberId = :memberId
+        AND (:includeEveryone = true OR m.type <> 'EVERYONE') AND (:includeAllTeams = true OR m.teamId = :teamId)
+        AND (
+           m.createdAt < :createdAt
+            OR (m.createdAt = :createdAt AND mm.id <= :id)
+        )
+        ORDER BY m.createdAt DESC, mm.id DESC
+    """)
+    List<MentionMember> findByCursor(
+            UUID memberId, Boolean includeEveryone, Boolean includeAllTeams,
+            UUID teamId, Long id, LocalDateTime createdAt, Pageable pageable
     );
 }

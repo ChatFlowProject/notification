@@ -27,26 +27,23 @@ public class Mention {
     private List<MentionMember> members = new ArrayList<>();
 
     private Long messageId;
-    private Long channelId;
-    // 조회 성능 향상을 위한 컬럼 (필터링)
     private UUID teamId;
 
     private LocalDateTime createdAt;
 
     @Builder
-    public Mention(Long messageId, Long channelId, MentionType type, LocalDateTime createdAt) {
+    public Mention(Long messageId, MentionType type, UUID teamId, LocalDateTime createdAt) {
         this.messageId = messageId;
-        this.channelId = channelId;
         this.type = type;
+        this.teamId = teamId;
         this.createdAt = createdAt;
-        this.members = new ArrayList<>();
     }
 
-    public static Mention create(MentionEventPayload event, ChannelReadModel channel) {
+    public static Mention create(MentionEventPayload event, UUID teamId) {
         return Mention.builder()
                 .messageId(event.messageId())
-                .channelId(channel.getId())
                 .type(event.type())
+                .teamId(teamId)
                 .createdAt(event.createdAt())
                 .build();
     }
