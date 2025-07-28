@@ -5,6 +5,7 @@ import shop.flowchat.notification.common.dto.MemberInfo;
 import shop.flowchat.notification.domain.notification.Notification;
 import shop.flowchat.notification.domain.notification.NotificationType;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record NotificationResponse(
@@ -16,10 +17,12 @@ public record NotificationResponse(
         UUID receiverId,
         @Schema(description = "알림 유형", example = "FRIEND_REQUEST")
         NotificationType type,
-        @Schema(description = "알림 메시지", example = "123")
+        @Schema(description = "알림 메시지", example = "친구 요청을 받았어요.")
         String message,
-        @Schema(description = "알림 확인 여부", example = "123")
-        Boolean isRead
+        @Schema(description = "알림 확인 여부", example = "true")
+        Boolean isRead,
+        @Schema(description = "알림 생성 시간", example = "2025-07-28T21:38:46.711Z")
+        LocalDateTime createdAt
 ) {
     public static NotificationResponse from(Notification noti) {
         return new NotificationResponse(
@@ -28,7 +31,8 @@ public record NotificationResponse(
                 noti.getReceiverId(),
                 noti.getType(),
                 noti.getMessage(),
-                noti.getIsRead()
+                noti.getIsRead(),
+                noti.getCreatedAt()
         );
     }
 }

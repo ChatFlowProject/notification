@@ -23,7 +23,7 @@ public class NotificationController {
     private final NotificationQuery notificationQuery;
     private final NotificationCommandService notificationCommandService;
 
-    @Operation(summary = "모든 알림 조회")
+    @Operation(summary = "알림 조회")
     @GetMapping
     public ResponseEntity<CursorResponse<NotificationResponse>> getAllNotifications(
             @Parameter(hidden = true) @RequestHeader("Authorization") String token,
@@ -33,7 +33,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationQuery.getAllNotifications(token, dateTime, notificationId, size));
     }
 
-    @Operation(summary = "읽지 않은 알림 커서 기반 조회")
+    @Operation(summary = "읽지 않은 알림 조회")
     @GetMapping("/unread")
     public ResponseEntity<CursorResponse<NotificationResponse>> getUnreadNotifications(
             @Parameter(hidden = true) @RequestHeader("Authorization") String token,
