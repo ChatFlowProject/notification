@@ -39,10 +39,10 @@ public class Mention {
         this.createdAt = createdAt;
     }
 
-    public static Mention create(MentionEventPayload event, UUID teamId) {
+    public static Mention create(MentionEventPayload event, UUID teamId, MentionType type) {
         return Mention.builder()
                 .messageId(event.messageId())
-                .type(event.type())
+                .type(type)
                 .teamId(teamId)
                 .createdAt(event.createdAt())
                 .build();

@@ -16,6 +16,5 @@ public record MentionEventPayload(
         Boolean isUpdated,
         Boolean isDeleted,
         List<AttachmentDto> attachments,
-        MentionType type,
-        List<UUID> memberIds
+        List<String> memberIds
 ) {}

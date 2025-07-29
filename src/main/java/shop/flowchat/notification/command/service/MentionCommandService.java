@@ -33,12 +33,22 @@ public class MentionCommandService {
     public void createMention(MentionEventPayload payload) {
         ChannelContextDto channelContextDto = mentionTargetQuery.findJoinedChannelByChatId(payload.chatId());
 
-        Mention mention = Mention.create(payload, channelContextDto.team().getId());
-        mentionRepository.save(mention);
+        MentionType mentionType;
+        List<UUID> memberIds;
+        if (payload.memberIds() != null && payload.memberIds().size() == 1 && "everyone".equalsIgnoreCase(
+                payload.memberIds().get(0))) {
+            mentionType = MentionType.EVERYONE;
+            memberIds = mentionTargetQuery.findTeamMembers(channelContextDto.team().getId());
+        } else if (payload.memberIds() != null && !payload.memberIds().isEmpty()) {
+            mentionType = MentionType.INDIVIDUAL;
+            memberIds = payload.memberIds().stream().map(UUID::fromString).toList();
+        } else {
+            mentionType = null;
+            memberIds = null;
+        }
 
-        List<UUID> memberIds = (payload.type().equals(MentionType.EVERYONE))
-                ? mentionTargetQuery.findTeamMembers(channelContextDto.team().getId())
-                : payload.memberIds();
+        Mention mention = Mention.create(payload, channelContextDto.team().getId(), mentionType);
+        mentionRepository.save(mention);
 
         List<MentionMember> mentionMembers = memberIds.stream()
                 .map(memberId -> MentionMember.create(memberId, mention))
