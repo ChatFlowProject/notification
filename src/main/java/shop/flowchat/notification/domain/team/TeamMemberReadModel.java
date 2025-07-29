@@ -7,7 +7,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.flowchat.notification.event.payload.TeamMemberEventPayload;
+import shop.flowchat.notification.external.kafka.payload.team.TeamMemberEventPayload;
 
 @Entity
 @Getter

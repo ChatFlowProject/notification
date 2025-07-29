@@ -7,8 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import shop.flowchat.notification.event.payload.MentionEventPayload;
-import shop.flowchat.notification.domain.channel.ChannelReadModel;
+import shop.flowchat.notification.external.kafka.payload.message.MentionEventPayload;
 
 @Entity
 @Getter

@@ -1,7 +1,7 @@
 package shop.flowchat.notification.presentation.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import shop.flowchat.notification.common.dto.MemberInfo;
+import shop.flowchat.notification.common.dto.info.MemberInfo;
 import shop.flowchat.notification.domain.notification.Notification;
 import shop.flowchat.notification.domain.notification.NotificationType;
 

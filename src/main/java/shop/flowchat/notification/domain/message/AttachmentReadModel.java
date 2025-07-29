@@ -4,13 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import shop.flowchat.notification.common.dto.AttachmentDto;
-import shop.flowchat.notification.common.dto.AttachmentType;
+import shop.flowchat.notification.common.dto.message.AttachmentDto;
+import shop.flowchat.notification.common.dto.message.AttachmentType;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

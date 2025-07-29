@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.flowchat.notification.domain.message.AttachmentReadModel;
 import shop.flowchat.notification.domain.message.MessageReadModel;
-import shop.flowchat.notification.event.payload.MentionEventPayload;
+import shop.flowchat.notification.external.kafka.payload.message.MentionEventPayload;
 import shop.flowchat.notification.infrastructure.repository.message.AttachmentReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.message.MessageReadModelRepository;
 

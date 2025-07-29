@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
-import shop.flowchat.notification.event.payload.CategoryEventPayload;
+import shop.flowchat.notification.external.kafka.payload.category.CategoryEventPayload;
 
 @Entity
 @Getter
