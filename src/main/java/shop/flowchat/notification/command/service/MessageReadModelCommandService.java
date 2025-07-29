@@ -45,8 +45,8 @@ public class MessageReadModelCommandService {
     }
 
     public void deleteMessage(MentionEventPayload payload) {
+        if (!messageRepository.existsById(payload.messageId())) return;
         messageRepository.deleteById(payload.messageId());
         attachmentRepository.deleteByMessageId(payload.messageId());
     }
-
 }

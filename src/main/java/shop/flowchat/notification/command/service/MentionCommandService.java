@@ -103,7 +103,10 @@ public class MentionCommandService {
     }
 
     public void deleteMention(MentionEventPayload payload) {
-        Long mentionId = mentionRepository.deleteByMessageId(payload.messageId());
-        mentionMemberRepository.deleteByMentionId(mentionId);
+        Mention mention = mentionRepository.findByMessageId(payload.messageId());
+        if (mention == null) return;
+
+        mentionMemberRepository.deleteByMentionId(mention.getId());
+        mentionRepository.delete(mention);
     }
 }
