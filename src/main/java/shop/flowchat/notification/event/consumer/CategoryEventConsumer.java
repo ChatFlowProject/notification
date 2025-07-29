@@ -8,19 +8,20 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 import shop.flowchat.notification.command.service.TeamReadModelCommandService;
-import shop.flowchat.notification.event.payload.ChannelEventPayload;
+import shop.flowchat.notification.event.payload.CategoryEventPayload;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ChannelEventConsumer {
+public class CategoryEventConsumer {
     private final ObjectMapper objectMapper;
     private final TeamReadModelCommandService commandService;
 
-    @KafkaListener(topics = "channel")
-    public void consume(ConsumerRecord<String, String> record, @Header(name = "eventType", required = false) String eventType) {
+    @KafkaListener(topics = "category")
+    public void consume(ConsumerRecord<String, String> record,
+                        @Header(name = "eventType", required = false) String eventType) {
         try {
-            ChannelEventPayload payload = objectMapper.readValue(record.value(), ChannelEventPayload.class);
+            CategoryEventPayload payload = objectMapper.readValue(record.value(), CategoryEventPayload.class);
 
             if (eventType == null) {
                 log.warn("eventType Header is null. Skipping record: {}", record);
@@ -28,10 +29,9 @@ public class ChannelEventConsumer {
             }
 
             switch (eventType) {
-                case "channelCreate" -> commandService.createChannel(payload);
-                case "channelUpdate" -> commandService.updateChannel(payload);
-                case "channelDelete" -> commandService.deleteChannel(payload);
-                default -> log.warn("Unknown channel eventType: {} Skipping record: {}", eventType, record);
+                case "categoryCreate" -> commandService.createCategory(payload);
+                case "categoryDelete" -> commandService.deleteCategory(payload);
+                default -> log.warn("Unknown category eventType: {} Skipping record: {}", eventType, record);
             }
 
         } catch (Exception e) {

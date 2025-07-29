@@ -109,4 +109,14 @@ public class MentionCommandService {
         mentionMemberRepository.deleteByMentionId(mention.getId());
         mentionRepository.delete(mention);
     }
+
+    public void deleteMentions(List<Long> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) return;
+
+        List<Long> mentionIds = mentionRepository.findIdsByMessageIdIn(messageIds);
+        if (!mentionIds.isEmpty()) {
+            mentionMemberRepository.deleteByMentionIdIn(mentionIds);
+            mentionRepository.deleteByIdIn(mentionIds);
+        }
+    }
 }

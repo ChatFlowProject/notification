@@ -3,6 +3,7 @@ package shop.flowchat.notification.infrastructure.repository.channel;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.flowchat.notification.common.dto.ChannelContextDto;
@@ -26,4 +27,12 @@ public interface ChannelReadModelRepository extends JpaRepository<ChannelReadMod
         WHERE c.chatId IN :chatIds
     """)
     List<ChannelContextDto> findAllChannelCategoryTeamByChatIds(@Param("chatIds") List<UUID> chatIds);
+
+    List<ChannelReadModel> findAllByCategoryIdIn(List<Long> categoryIds);
+
+    List<ChannelReadModel> findAllByCategoryId(Long categoryId);
+
+    @Modifying
+    @Query("DELETE FROM ChannelReadModel c WHERE c.categoryId IN :categoryIds")
+    void deleteByCategoryIds(@Param("categoryIds") List<Long> categoryIds);
 }

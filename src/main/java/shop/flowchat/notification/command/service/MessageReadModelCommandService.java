@@ -1,6 +1,7 @@
 package shop.flowchat.notification.command.service;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +33,7 @@ public class MessageReadModelCommandService {
         messageRepository.findById(payload.messageId())
                 .ifPresentOrElse(
                         existingMessage -> {
-                            if (existingMessage.isUpdated(payload.updatedAt())) {
+                            if (existingMessage.needsUpdate(payload.updatedAt())) {
                                 existingMessage.updateContent(payload.content());
                             }
                         },
@@ -48,5 +49,13 @@ public class MessageReadModelCommandService {
         if (!messageRepository.existsById(payload.messageId())) return;
         messageRepository.deleteById(payload.messageId());
         attachmentRepository.deleteByMessageId(payload.messageId());
+    }
+
+    public List<Long> deleteMessages(UUID chatId) {
+        List<Long> messageIds = messageRepository.findIdsByChatId(chatId);
+        if (messageIds.isEmpty()) return List.of();
+        messageRepository.deleteByChatId(chatId);
+        attachmentRepository.deleteByMessageIds(messageIds);
+        return messageIds;
     }
 }

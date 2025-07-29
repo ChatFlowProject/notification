@@ -5,14 +5,18 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import shop.flowchat.notification.domain.mention.MentionMember;
 
 public interface MentionMemberRepository extends JpaRepository<MentionMember, Long> {
     List<MentionMember>findByMentionId(Long id);
+
     void deleteByMentionIdAndMemberIdIn(Long id, List<UUID> memberIds);
+
     void deleteByMentionId(Long id);
+
     @Query("""
         SELECT mm FROM MentionMember mm
         JOIN FETCH mm.mention m WHERE mm.memberId = :memberId
@@ -41,4 +45,8 @@ public interface MentionMemberRepository extends JpaRepository<MentionMember, Lo
             UUID memberId, Boolean includeEveryone, Boolean includeAllTeams,
             UUID teamId, Long id, LocalDateTime createdAt, Pageable pageable
     );
+
+    @Modifying
+    @Query("delete from MentionMember mm where mm.mention.id in :mentionIds")
+    void deleteByMentionIdIn(@Param("mentionIds") List<Long> mentionIds);
 }

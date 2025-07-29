@@ -31,7 +31,7 @@ public class MessageEventConsumer {
                 case "mentionCreate" -> commandService.createMessage(payload);
                 case "mentionUpdate" -> commandService.updateMessage(payload);
                 case "mentionDelete" -> commandService.deleteMessage(payload);
-                default -> log.warn("Unknown member eventType: {} Skipping record: {}", eventType, record);
+                default -> log.warn("Unknown message eventType: {} Skipping record: {}", eventType, record);
             }
 
         } catch (Exception e) {
