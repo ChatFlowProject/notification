@@ -24,7 +24,7 @@ public class AttachmentReadModel {
     private AttachmentType type;
 
     @Builder
-    public AttachmentReadModel(Long messageId, String url, AttachmentType type) {
+    private AttachmentReadModel(Long messageId, String url, AttachmentType type) {
         this.messageId = messageId;
         this.url = url;
         this.type = type;

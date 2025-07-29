@@ -29,7 +29,7 @@ public class MessageReadModel{
     private LocalDateTime updatedAt;
 
     @Builder
-    public MessageReadModel(Long id, UUID chatId, UUID memberId, String content, LocalDateTime createdAt) {
+    private MessageReadModel(Long id, UUID chatId, UUID memberId, String content, LocalDateTime createdAt) {
         this.id = id;
         this.chatId = chatId;
         this.memberId = memberId;
@@ -49,12 +49,8 @@ public class MessageReadModel{
                 .build();
     }
 
-    public boolean isUpdated(LocalDateTime timestamp) {
-        return updatedAt == null || timestamp.isAfter(updatedAt);
-    }
-
-    public void setIsDeleted(boolean deleted) {
-        this.isDeleted = deleted;
+    public boolean needsUpdate(LocalDateTime timestamp) {
+        return updatedAt == null || timestamp.isBefore(updatedAt);
     }
 
     public void updateContent(String newContent) {

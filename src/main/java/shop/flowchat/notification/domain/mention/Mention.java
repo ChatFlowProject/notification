@@ -32,7 +32,7 @@ public class Mention {
     private LocalDateTime createdAt;
 
     @Builder
-    public Mention(Long messageId, MentionType type, UUID teamId, LocalDateTime createdAt) {
+    private Mention(Long messageId, MentionType type, UUID teamId, LocalDateTime createdAt) {
         this.messageId = messageId;
         this.type = type;
         this.teamId = teamId;

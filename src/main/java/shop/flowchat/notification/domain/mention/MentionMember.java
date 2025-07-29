@@ -23,7 +23,7 @@ public class MentionMember {
     private Mention mention;
 
     @Builder
-    public MentionMember(UUID memberId, Mention mention) {
+    private MentionMember(UUID memberId, Mention mention) {
         this.memberId = memberId;
         this.mention = mention;
     }
