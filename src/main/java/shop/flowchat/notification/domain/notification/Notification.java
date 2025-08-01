@@ -35,26 +35,30 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private Boolean isRead;
 
-    private String targetId; // ex. teamId
+    private UUID chatId;
+
+    private Long messageId;
 
     @Builder
-    private Notification(MemberReadModel sender, UUID receiverId, NotificationType type, String message, Boolean isRead, String targetId) {
+    private Notification(MemberReadModel sender, UUID receiverId, NotificationType type, String message, Boolean isRead, UUID chatId, Long messageId) {
         this.sender = sender;
         this.receiverId = receiverId;
         this.type = type;
         this.message = message;
         this.isRead = isRead;
-        this.targetId = targetId;
+        this.chatId = chatId;
+        this.messageId = messageId;
     }
 
-    public static Notification create(MemberReadModel sender, UUID receiverId, NotificationType type, String message, String targetId) {
+    public static Notification create(MemberReadModel sender, UUID receiverId, NotificationType type, String message, UUID chatId, Long messageId) {
         return Notification.builder()
                 .sender(sender)
                 .receiverId(receiverId)
                 .type(type)
                 .message(message)
                 .isRead(false)
-                .targetId(targetId)
+                .chatId(chatId)
+                .messageId(messageId)
                 .build();
     }
 

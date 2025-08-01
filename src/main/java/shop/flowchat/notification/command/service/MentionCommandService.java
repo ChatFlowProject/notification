@@ -122,7 +122,7 @@ public class MentionCommandService {
         }
     }
 
-    public void sendMentionNotification(List<UUID>receiverIds, MentionMessageResponse response) {
+    private void sendMentionNotification(List<UUID>receiverIds, MentionMessageResponse response) {
         for (UUID receiverId : receiverIds) {
             SseEmitter emitter = emitterRepository.get(receiverId);
             if (emitter != null) {

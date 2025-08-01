@@ -45,6 +45,7 @@ public class NotificationCommandService {
                 receiverId,
                 type,
                 messageProvider.apply(sender),
+                null,
                 null
         );
         notificationRepository.save(notification);
