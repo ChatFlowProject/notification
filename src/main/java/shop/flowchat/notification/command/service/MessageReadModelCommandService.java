@@ -1,12 +1,13 @@
 package shop.flowchat.notification.command.service;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.flowchat.notification.domain.message.AttachmentReadModel;
 import shop.flowchat.notification.domain.message.MessageReadModel;
-import shop.flowchat.notification.event.payload.MentionEventPayload;
+import shop.flowchat.notification.external.kafka.payload.message.MentionEventPayload;
 import shop.flowchat.notification.infrastructure.repository.message.AttachmentReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.message.MessageReadModelRepository;
 
@@ -32,7 +33,7 @@ public class MessageReadModelCommandService {
         messageRepository.findById(payload.messageId())
                 .ifPresentOrElse(
                         existingMessage -> {
-                            if (existingMessage.isUpdated(payload.updatedAt())) {
+                            if (existingMessage.needsUpdate(payload.updatedAt())) {
                                 existingMessage.updateContent(payload.content());
                             }
                         },
@@ -45,8 +46,16 @@ public class MessageReadModelCommandService {
     }
 
     public void deleteMessage(MentionEventPayload payload) {
+        if (!messageRepository.existsById(payload.messageId())) return;
         messageRepository.deleteById(payload.messageId());
         attachmentRepository.deleteByMessageId(payload.messageId());
     }
 
+    public List<Long> deleteMessages(UUID chatId) {
+        List<Long> messageIds = messageRepository.findIdsByChatId(chatId);
+        if (messageIds.isEmpty()) return List.of();
+        messageRepository.deleteByChatId(chatId);
+        attachmentRepository.deleteByMessageIds(messageIds);
+        return messageIds;
+    }
 }

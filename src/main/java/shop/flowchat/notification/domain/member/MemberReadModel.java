@@ -10,7 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import shop.flowchat.notification.domain.BaseEntity;
-import shop.flowchat.notification.event.payload.MemberEventPayload;
+import shop.flowchat.notification.external.kafka.payload.member.MemberEventPayload;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

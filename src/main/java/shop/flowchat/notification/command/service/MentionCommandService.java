@@ -1,21 +1,23 @@
 package shop.flowchat.notification.command.service;
 
 import jakarta.transaction.Transactional;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import shop.flowchat.notification.common.dto.MentionMessageResponse;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import shop.flowchat.notification.common.dto.message.MentionMessageResponse;
 import shop.flowchat.notification.common.dto.ChannelContextDto;
-import shop.flowchat.notification.common.dto.MessageInfo;
+import shop.flowchat.notification.common.dto.info.MessageInfo;
 import shop.flowchat.notification.domain.member.MemberReadModel;
 import shop.flowchat.notification.domain.mention.MentionType;
-import shop.flowchat.notification.event.payload.MentionEventPayload;
+import shop.flowchat.notification.external.kafka.payload.message.MentionEventPayload;
 import shop.flowchat.notification.domain.mention.Mention;
 import shop.flowchat.notification.domain.mention.MentionMember;
 import shop.flowchat.notification.infrastructure.repository.mention.MentionMemberRepository;
 import shop.flowchat.notification.infrastructure.repository.mention.MentionRepository;
 import shop.flowchat.notification.query.MemberReadModelQuery;
 import shop.flowchat.notification.query.MentionTargetQuery;
-import shop.flowchat.notification.sse.service.MentionSseService;
+import shop.flowchat.notification.external.sse.repository.SseEmitterRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,17 +30,27 @@ public class MentionCommandService {
     private final MentionMemberRepository mentionMemberRepository;
     private final MemberReadModelQuery memberQuery;
     private final MentionTargetQuery mentionTargetQuery;
-    private final MentionSseService mentionSseService;
+    private final SseEmitterRepository emitterRepository;
 
     public void createMention(MentionEventPayload payload) {
         ChannelContextDto channelContextDto = mentionTargetQuery.findJoinedChannelByChatId(payload.chatId());
 
-        Mention mention = Mention.create(payload, channelContextDto.team().getId());
-        mentionRepository.save(mention);
+        MentionType mentionType;
+        List<UUID> memberIds;
+        if (payload.memberIds() != null && payload.memberIds().size() == 1 && "everyone".equalsIgnoreCase(
+                payload.memberIds().get(0))) {
+            mentionType = MentionType.EVERYONE;
+            memberIds = mentionTargetQuery.findTeamMembers(channelContextDto.team().getId());
+        } else if (payload.memberIds() != null && !payload.memberIds().isEmpty()) {
+            mentionType = MentionType.INDIVIDUAL;
+            memberIds = payload.memberIds().stream().map(UUID::fromString).toList();
+        } else {
+            mentionType = null;
+            memberIds = null;
+        }
 
-        List<UUID> memberIds = (payload.type().equals(MentionType.EVERYONE))
-                ? mentionTargetQuery.findTeamMembers(channelContextDto.team().getId())
-                : payload.memberIds();
+        Mention mention = Mention.create(payload, channelContextDto.team().getId(), mentionType);
+        mentionRepository.save(mention);
 
         List<MentionMember> mentionMembers = memberIds.stream()
                 .map(memberId -> MentionMember.create(memberId, mention))
@@ -48,7 +60,7 @@ public class MentionCommandService {
         MemberReadModel sender = memberQuery.getMemberById(payload.memberId());
 
         MentionMessageResponse response = MentionMessageResponse.from(sender, channelContextDto, MessageInfo.from(payload));
-        mentionSseService.send(memberIds, response);
+        sendMentionNotification(memberIds, response);
     }
 
     public void updateMention(MentionEventPayload payload) {
@@ -88,12 +100,40 @@ public class MentionCommandService {
             MemberReadModel sender = memberQuery.getMemberById(payload.memberId());
 
             MentionMessageResponse response = MentionMessageResponse.from(sender, channelContextDto, MessageInfo.from(payload));
-            mentionSseService.send(toAdd, response);
+            sendMentionNotification(toAdd, response);
         }
     }
 
     public void deleteMention(MentionEventPayload payload) {
-        Long mentionId = mentionRepository.deleteByMessageId(payload.messageId());
-        mentionMemberRepository.deleteByMentionId(mentionId);
+        Mention mention = mentionRepository.findByMessageId(payload.messageId());
+        if (mention == null) return;
+
+        mentionMemberRepository.deleteByMentionId(mention.getId());
+        mentionRepository.delete(mention);
+    }
+
+    public void deleteMentions(List<Long> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) return;
+
+        List<Long> mentionIds = mentionRepository.findIdsByMessageIdIn(messageIds);
+        if (!mentionIds.isEmpty()) {
+            mentionMemberRepository.deleteByMentionIdIn(mentionIds);
+            mentionRepository.deleteByIdIn(mentionIds);
+        }
+    }
+
+    private void sendMentionNotification(List<UUID>receiverIds, MentionMessageResponse response) {
+        for (UUID receiverId : receiverIds) {
+            SseEmitter emitter = emitterRepository.get(receiverId);
+            if (emitter != null) {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("mention")
+                            .data(response));
+                } catch (IOException e) {
+                    emitterRepository.remove(receiverId);
+                }
+            }
+        }
     }
 }

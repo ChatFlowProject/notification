@@ -1,7 +1,8 @@
 package shop.flowchat.notification.presentation.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import shop.flowchat.notification.common.dto.MemberInfo;
+import shop.flowchat.notification.common.dto.info.DmInfo;
+import shop.flowchat.notification.common.dto.info.MemberInfo;
 import shop.flowchat.notification.domain.notification.Notification;
 import shop.flowchat.notification.domain.notification.NotificationType;
 
@@ -13,6 +14,8 @@ public record NotificationResponse(
         Long id,
         @Schema(description = "알림 발신자")
         MemberInfo sender,
+        @Schema(description = "dm 채널로 이동을 위한 데이터")
+        DmInfo dm,
         @Schema(description = "알림 수신 회원 고유키", example = "98bd5bf6-848a-43d4-8683-205523c9e359")
         UUID receiverId,
         @Schema(description = "알림 유형", example = "FRIEND_REQUEST")
@@ -25,9 +28,14 @@ public record NotificationResponse(
         LocalDateTime createdAt
 ) {
     public static NotificationResponse from(Notification noti) {
+        DmInfo dm = (noti.getChatId() != null && noti.getMessageId() != null)
+                ? DmInfo.from(noti)
+                : null;
+
         return new NotificationResponse(
                 noti.getId(),
                 MemberInfo.from(noti.getSender()),
+                dm,
                 noti.getReceiverId(),
                 noti.getType(),
                 noti.getMessage(),

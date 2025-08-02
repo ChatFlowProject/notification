@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.flowchat.notification.domain.member.MemberReadModel;
-import shop.flowchat.notification.event.payload.MemberEventPayload;
+import shop.flowchat.notification.external.kafka.payload.member.MemberEventPayload;
 import shop.flowchat.notification.infrastructure.repository.member.MemberReadModelRepository;
 
 @Service

@@ -7,8 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import shop.flowchat.notification.event.payload.MentionEventPayload;
-import shop.flowchat.notification.domain.channel.ChannelReadModel;
+import shop.flowchat.notification.external.kafka.payload.message.MentionEventPayload;
 
 @Entity
 @Getter
@@ -32,17 +31,17 @@ public class Mention {
     private LocalDateTime createdAt;
 
     @Builder
-    public Mention(Long messageId, MentionType type, UUID teamId, LocalDateTime createdAt) {
+    private Mention(Long messageId, MentionType type, UUID teamId, LocalDateTime createdAt) {
         this.messageId = messageId;
         this.type = type;
         this.teamId = teamId;
         this.createdAt = createdAt;
     }
 
-    public static Mention create(MentionEventPayload event, UUID teamId) {
+    public static Mention create(MentionEventPayload event, UUID teamId, MentionType type) {
         return Mention.builder()
                 .messageId(event.messageId())
-                .type(event.type())
+                .type(type)
                 .teamId(teamId)
                 .createdAt(event.createdAt())
                 .build();
