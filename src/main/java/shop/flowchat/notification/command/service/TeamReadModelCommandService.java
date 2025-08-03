@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import shop.flowchat.notification.domain.category.CategoryReadModel;
 import shop.flowchat.notification.domain.channel.ChannelReadModel;
+import shop.flowchat.notification.domain.channel.ChannelReadModelAccessType;
 import shop.flowchat.notification.domain.team.TeamMemberReadModel;
 import shop.flowchat.notification.domain.team.TeamReadModel;
 import shop.flowchat.notification.external.kafka.payload.category.CategoryEventPayload;
@@ -15,6 +16,8 @@ import shop.flowchat.notification.external.kafka.payload.team.TeamMemberEventPay
 import shop.flowchat.notification.infrastructure.repository.category.CategoryReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.channel.ChannelReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.team.TeamMemberReadModelRepository;
+import shop.flowchat.notification.domain.channel.ChannelMemberReadModel;
+import shop.flowchat.notification.infrastructure.repository.channel.ChannelMemberReadModelRepository;
 import shop.flowchat.notification.infrastructure.repository.team.TeamReadModelRepository;
 
 import java.util.List;
@@ -30,6 +33,7 @@ public class TeamReadModelCommandService {
     private final ChannelReadModelRepository channelRepository;
     private final MessageReadModelCommandService messageCommandService;
     private final MentionCommandService mentionCommandService;
+    private final ChannelMemberReadModelRepository channelMemberRepository;
 
     // Team
     public void createTeam(TeamInitializationPayload payload) {
@@ -106,7 +110,15 @@ public class TeamReadModelCommandService {
     // Channel
     public void createChannel(ChannelEventPayload payload) {
         if (!channelRepository.existsById(payload.id())) {
-            channelRepository.save(ChannelReadModel.create(payload));
+            ChannelReadModel channel = ChannelReadModel.create(payload);
+            channelRepository.save(channel);
+
+            // 채널이 PRIVATE일 경우 멤버 UUID들을 저장
+            if (payload.channelAccessType() == ChannelReadModelAccessType.PRIVATE && payload.channelMembers() != null) {
+                payload.channelMembers().forEach(memberId ->
+                    channelMemberRepository.save(ChannelMemberReadModel.create(channel.getId(), memberId))
+                );
+            }
         }
     }
 
