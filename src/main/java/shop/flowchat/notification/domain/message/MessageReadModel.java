@@ -50,7 +50,7 @@ public class MessageReadModel{
     }
 
     public boolean needsUpdate(LocalDateTime timestamp) {
-        return updatedAt == null || timestamp.isBefore(updatedAt);
+        return updatedAt == null || updatedAt.isBefore(timestamp);
     }
 
     public void updateContent(String newContent) {

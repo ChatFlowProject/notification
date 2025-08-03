@@ -52,8 +52,8 @@ public class ChannelReadModel {
     }
 
 
-    public boolean needsUpdate(LocalDateTime updatedAt) {
-        return this.updatedAt == null || this.updatedAt.isBefore(updatedAt);
+    public boolean needsUpdate(LocalDateTime timestamp) {
+        return this.updatedAt == null || this.updatedAt.isBefore(timestamp);
     }
 
     public void update(ChannelEventPayload payload) {
