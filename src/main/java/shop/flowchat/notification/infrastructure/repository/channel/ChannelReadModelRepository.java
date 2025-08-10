@@ -1,6 +1,7 @@
 package shop.flowchat.notification.infrastructure.repository.channel;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,6 +28,8 @@ public interface ChannelReadModelRepository extends JpaRepository<ChannelReadMod
         WHERE c.chatId IN :chatIds
     """)
     List<ChannelContextDto> findAllChannelCategoryTeamByChatIds(@Param("chatIds") List<UUID> chatIds);
+
+    Optional<ChannelReadModel> findByChatId(UUID chatId);
 
     List<ChannelReadModel> findAllByCategoryIdIn(List<Long> categoryIds);
 
